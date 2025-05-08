@@ -161,7 +161,7 @@ struct HomeScreen: View {
                                     HStack {
                                         Image("bottom")
                                             .resizable()
-                                            .frame(width: 30, height: 38)
+                                            .frame(width: 30, height: 32)
                                         Text("Upload Bottom")
                                             .foregroundColor(.blue)
                                         Spacer()

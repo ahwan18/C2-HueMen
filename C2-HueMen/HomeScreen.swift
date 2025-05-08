@@ -75,20 +75,18 @@ struct HomeScreen: View {
                                     Button(action: {
                 navigateToColorCloset = true
             }) {
-                Image(systemName: "hanger")
+                Image(systemName: "cabinet.fill")
                     .foregroundStyle(.black)
                     .padding(10)
                     .background(Color.gray.opacity(0.2))
                     .clipShape(Circle())
             }
             )
+            .navigationDestination(isPresented: $navigateToColorCloset) {
+                    ColorClosetView()
+                }
             .background(
                 ZStack {
-                    NavigationLink(
-                        destination: ColorClosetView(),
-                        isActive: $navigateToColorCloset
-                    ) { EmptyView() }
-                    Color.white
                     HStack {
                         ZStack {
                             RoundedRectangle(cornerRadius: 20)

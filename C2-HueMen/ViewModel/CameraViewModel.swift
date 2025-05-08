@@ -71,12 +71,10 @@ class CameraViewModel: NSObject, ObservableObject, AVCaptureVideoDataOutputSampl
                 }
             }
 
-            // Orange & Coral
+            // Coral
             if hue >= 15 && hue < 30 {
                 if brightness > 0.7 {
                     return "Coral"
-                } else {
-                    return "Rose"
                 }
             }
 
@@ -157,11 +155,6 @@ class CameraViewModel: NSObject, ObservableObject, AVCaptureVideoDataOutputSampl
             // Magenta
             if hue >= 300 && hue < 330 {
                 return "Magenta"
-            }
-
-            // Rose again (for cooler magenta)
-            if hue >= 330 && hue < 345 {
-                return "Rose"
             }
 
             // Fallback

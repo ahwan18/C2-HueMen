@@ -16,6 +16,10 @@ struct RecommendationView: View {
         case bottom = "Bottom Colors"
     }
 
+    // Add parameters for selected color and upload type
+    let selectedColor: Color
+    let uploadType: UploadType
+    
     // Sekarang, gunakan mode .top
     var mode: Mode = .top
 
@@ -117,6 +121,14 @@ struct RecommendationView: View {
             .padding(.horizontal)
         }
         .padding(.top)
+        .onAppear {
+            // Set the initial color based on uploadType
+            if uploadType == .top {
+                topColor = selectedColor
+            } else {
+                bottomColor = selectedColor
+            }
+        }
     }
 }
 
@@ -199,7 +211,7 @@ struct PantsShape: Shape {
 }
 
 #Preview {
-    RecommendationView()
+    RecommendationView(selectedColor: .brown, uploadType: .top)
 }
 
 

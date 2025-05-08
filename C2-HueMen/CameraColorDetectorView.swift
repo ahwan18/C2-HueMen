@@ -4,6 +4,9 @@ import AVFoundation
 struct CameraColorDetectorView: View {
     @Environment(\.presentationMode) var presentationMode
     @StateObject private var viewModel = CameraViewModel()
+    @State private var showColorSuggestion = false
+    @State private var capturedColor: Color?
+    @State private var isCapturing = false
     var uploadType: UploadType
     
     var body: some View {
@@ -69,7 +72,22 @@ struct CameraColorDetectorView: View {
                 
                 VStack {
                     Button(action: {
-                        //
+                        withAnimation(.spring(response: 0.2, dampingFraction: 0.5)) {
+                            isCapturing = true
+                        }
+
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                            isCapturing = false
+                        }
+
+                        if let color = viewModel.detectedColor {
+                            capturedColor = Color(
+                                red: Double(color.r) / 255.0,
+                                green: Double(color.g) / 255.0,
+                                blue: Double(color.b) / 255.0
+                            )
+                            showColorSuggestion = true
+                        }
                     }) {
                         ZStack {
                             Circle()
@@ -77,10 +95,12 @@ struct CameraColorDetectorView: View {
                                 .frame(width: 70, height: 70)
                             Circle()
                                 .fill(Color.white)
-                                .frame(width: 60, height: 60)
+                                .frame(width: isCapturing ? 50 : 60, height: isCapturing ? 50 : 60)
+                                .scaleEffect(isCapturing ? 0.85 : 1.0)
                         }
                     }
                     .buttonStyle(PlainButtonStyle())
+                    .animation(.easeInOut(duration: 0.2), value: isCapturing)
                 }
                 .frame(maxWidth: .infinity)
                 .padding()
@@ -91,12 +111,11 @@ struct CameraColorDetectorView: View {
         .onAppear {
             viewModel.configure()
         }
-        // Navigasi ke screen baru jika ada hasil capture
-        //        .fullScreenCover(item: $viewModel.capturedImage) { image in
-        //            CapturedImageView(image: image) {
-        //                viewModel.capturedImage = nil
-        //            }
-        //        }
+        .fullScreenCover(isPresented: $showColorSuggestion) {
+            if let color = capturedColor {
+                RecommendationView(selectedColor: color, uploadType: uploadType)
+            }
+        }
     }
 }
 

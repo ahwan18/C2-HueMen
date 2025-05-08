@@ -18,7 +18,7 @@ struct RecommendationView: View {
     }
 
     // Sekarang, gunakan mode .top
-    var mode: Mode = .bottom
+    var mode: Mode = .top
 
     @State private var topColor: Color = .brown
     @State private var bottomColor: Color = .teal

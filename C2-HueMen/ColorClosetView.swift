@@ -1,21 +1,34 @@
 import SwiftUI
 
 struct ColorClosetView: View {
-    @State private var solidColors: [Color] = [.red, .blue, .green, .yellow, .orange, .purple, .pink]
-    @State private var multiColors: [(Color, Color)] = [(.gray, .mint), (.cyan, .brown), (.indigo, .teal), (.black, .white)]
-    @State private var selectedColors: Set<Color> = []
-    @State private var selectedMultiColors: Set<Int> = []
+    // Top Section
+    @State private var topSolidColors: [Color] = [.red, .blue, .green, .yellow, .orange, .purple, .pink]
+    @State private var topMultiColors: [(Color, Color)] = [(.gray, .mint), (.cyan, .brown), (.indigo, .teal), (.black, .white)]
+    @State private var selectedTopColors: Set<Color> = []
+    @State private var selectedTopMultiColors: Set<Int> = []
+
+    // Bottom Section
+    @State private var bottomSolidColors: [Color] = [.red, .blue, .green, .yellow]
+    @State private var bottomMultiColors: [(Color, Color)] = [(.mint, .gray), (.orange, .purple)]
+    @State private var selectedBottomColors: Set<Color> = []
+    @State private var selectedBottomMultiColors: Set<Int> = []
+
+    // Add Color Sheets
     @State private var showSolidColorPicker = false
     @State private var showMultiColorPicker = false
+    @State private var isAddingToTop = true
+
     @State private var newColor: Color = .black
     @State private var newMultiColor1: Color = .gray
     @State private var newMultiColor2: Color = .blue
     
+    @Environment(\.dismiss) private var dismiss
+
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack {
-                    // Top Section
+                VStack(spacing: 0) {
+                    //Top section
                     VStack(alignment: .center) {
                         HStack {
                             Image(systemName: "tshirt.circle")
@@ -25,10 +38,9 @@ struct ColorClosetView: View {
                                 .font(.title2)
                                 .multilineTextAlignment(.leading)
                             Spacer()
-                            
                         }
-                        .padding(.horizontal,6)
-                        
+                        .padding(.horizontal, 6)
+
                         HStack {
                             Text("Solid Color")
                                 .font(.system(size: 20, weight: .semibold))
@@ -36,15 +48,16 @@ struct ColorClosetView: View {
                             Spacer()
                         }
                         .padding(.top,1)
-                        
+
                         ColorBlockGrid2(
-                            colors: solidColors,
-                            selectedColors: $selectedColors,
+                            colors: topSolidColors,
+                            selectedColors: $selectedTopColors,
                             onAddColor: {
+                                isAddingToTop = true
                                 showSolidColorPicker = true
                             }
                         )
-                        
+
                         HStack {
                             Text("Multi Color")
                                 .font(.system(size: 20, weight: .semibold))
@@ -52,34 +65,34 @@ struct ColorClosetView: View {
                             Spacer()
                         }
                         .padding(.top,30)
-                        
+
                         MultiColorBlockGrid2(
-                            colors: multiColors,
-                            selectedIndices: $selectedMultiColors,
+                            colors: topMultiColors,
+                            selectedIndices: $selectedTopMultiColors,
                             onAddColor: {
+                                isAddingToTop = true
                                 showMultiColorPicker = true
                             }
                         )
                     }
-                    .padding(.vertical)
+                    .padding(.top, 6.75)
+                    .padding(.bottom, 11.25)
                     .background(RoundedRectangle(cornerRadius: 12).fill(Color(.systemGray6)))
-                    
-                    Spacer()
-                    
-                    // Bottom Section
+        
+
+                    // Bottom section
                     VStack(alignment: .center) {
                         HStack {
-                            Image(.name6RemovebgPreview)
+                            Image(.bottom2)
                                 .resizable()
                                 .frame(width: 30, height: 38)
                             Text("Bottom Colors")
                                 .font(.title2)
                                 .multilineTextAlignment(.leading)
                             Spacer()
-                            
                         }
-                        .padding(.horizontal,6)
-                        
+                        .padding(.horizontal, 6)
+
                         HStack {
                             Text("Solid Color")
                                 .font(.system(size: 20, weight: .semibold))
@@ -87,15 +100,16 @@ struct ColorClosetView: View {
                             Spacer()
                         }
                         .padding(.top,1)
-                        
+
                         ColorBlockGrid2(
-                            colors: solidColors,
-                            selectedColors: $selectedColors,
+                            colors: bottomSolidColors,
+                            selectedColors: $selectedBottomColors,
                             onAddColor: {
+                                isAddingToTop = false
                                 showSolidColorPicker = true
                             }
                         )
-                        
+
                         HStack {
                             Text("Multi Color")
                                 .font(.system(size: 20, weight: .semibold))
@@ -103,43 +117,67 @@ struct ColorClosetView: View {
                             Spacer()
                         }
                         .padding(.top,30)
-                        
+
                         MultiColorBlockGrid2(
-                            colors: multiColors,
-                            selectedIndices: $selectedMultiColors,
+                            colors: bottomMultiColors,
+                            selectedIndices: $selectedBottomMultiColors,
                             onAddColor: {
+                                isAddingToTop = false
                                 showMultiColorPicker = true
                             }
                         )
                     }
                     .padding(.vertical)
                     .background(RoundedRectangle(cornerRadius: 12).fill(Color(.systemGray6)))
-                    .padding(.top, 25)
-
+                    .padding(.top, 24)
                 }
-                .sheet(isPresented: $showSolidColorPicker) {
-                    SolidColorPickerSheet(newColor: $newColor) {
-                        solidColors.append(newColor)
-                        showSolidColorPicker = false
+                .padding(.horizontal, 14.25)
+                .padding(.top, 20)
+            }
+            .sheet(isPresented: $showSolidColorPicker) {
+                SolidColorPickerSheet(newColor: $newColor) {
+                    if isAddingToTop {
+                        topSolidColors.append(newColor)
+                    } else {
+                        bottomSolidColors.append(newColor)
+                    }
+                    showSolidColorPicker = false
+                }
+            }
+            .sheet(isPresented: $showMultiColorPicker) {
+                MultiColorPickerSheet(
+                    newLeftColor: $newMultiColor1,
+                    newRightColor: $newMultiColor2
+                ) {
+                    if isAddingToTop {
+                        topMultiColors.append((newMultiColor1, newMultiColor2))
+                    } else {
+                        bottomMultiColors.append((newMultiColor1, newMultiColor2))
+                    }
+                    showMultiColorPicker = false
+                }
+            }
+            .navigationBarTitleDisplayMode(.inline)
+            .navigationBarBackButtonHidden(true)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button(action: {
+                        dismiss()
+                    }) {
+                        HStack(spacing: 4) {
+                            Image(systemName: "chevron.left")
+                                .font(.system(size: 17, weight: .semibold))
+                            Text("Back")
+                                .font(.system(size: 17))
+                        }
+                        .foregroundColor(.black)
                     }
                 }
-                
-                .sheet(isPresented: $showMultiColorPicker) {
-                    MultiColorPickerSheet(
-                        newLeftColor: $newMultiColor1,
-                        newRightColor: $newMultiColor2
-                    ) {
-                        multiColors.append((newMultiColor1, newMultiColor2))
-                        showMultiColorPicker = false
-                    }
-                }
-                .padding()
             }
         }
-        .navigationTitle("Color Closet")
-        .navigationBarTitleDisplayMode(.inline)
     }
 }
+
 
 // MARK: - Reusable Components
 

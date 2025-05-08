@@ -12,6 +12,7 @@ import SwiftData
 struct C2_HueMenApp: App {
     var body: some Scene {
         WindowGroup {
+//            CameraColorDetectorView(uploadType: .top)
             HomeScreen()
         }
     }

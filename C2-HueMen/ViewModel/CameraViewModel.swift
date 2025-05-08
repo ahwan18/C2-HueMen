@@ -26,7 +26,11 @@ class CameraViewModel: NSObject, ObservableObject, AVCaptureVideoDataOutputSampl
         output.setSampleBufferDelegate(self, queue: queue)
         session.addOutput(output)
         session.commitConfiguration()
-        session.startRunning()
+        
+        DispatchQueue.global(qos: .userInitiated).async {
+            self.session.startRunning()
+        }
+        
     }
     
     func labelColor(from hue: CGFloat, saturation: CGFloat, brightness: CGFloat) -> String {
@@ -194,6 +198,7 @@ class CameraViewModel: NSObject, ObservableObject, AVCaptureVideoDataOutputSampl
                         let label = self.labelColor(from: hsb.hue, saturation: hsb.saturation, brightness: hsb.brightness)
                         self.detectedColorLabel = label
                         print("Detected Color Label: \(label)")
+                        print(color)
                     }
                 }
             }

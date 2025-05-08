@@ -69,7 +69,7 @@ struct ColorClosetView: View {
                     // Bottom Section
                     VStack(alignment: .center) {
                         HStack {
-                            Image(.name6RemovebgPreview)
+                            Image(.bottom2)
                                 .resizable()
                                 .frame(width: 30, height: 38)
                             Text("Bottom Colors")

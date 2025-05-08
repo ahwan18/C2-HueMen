@@ -8,6 +8,9 @@
 import SwiftUI
 
 struct HomeScreen: View {
+    @State private var navigateToColorCloset = false
+    @State private var showUploadOptions = false
+    
     var body: some View {
         NavigationStack {
             VStack {
@@ -29,7 +32,7 @@ struct HomeScreen: View {
                 Spacer().frame(height: 60)
                 
                 Button(action: {
-                    // Upload action
+                    showUploadOptions = true
                 }) {
                     Text("Upload")
                         .foregroundColor(.white)
@@ -40,9 +43,25 @@ struct HomeScreen: View {
                         .shadow(radius: 4, y: 2)
                 }
                 .padding(.horizontal, 40)
+                .confirmationDialog("", isPresented: $showUploadOptions, titleVisibility: .hidden) {
+                    Button {
+                        // Action utk Upload Top
+                    } label: {
+                        Label("Upload Top", systemImage: "tshirt")
+                    }
+                    
+                    Button {
+                        // Action utk Upload Bottom
+                    } label: {
+                        Label("Upload Bottom", systemImage: "figure.walk")
+                    }
+                    
+                    Button("Cancel", role: .cancel) {}
+                }
+                
                 
                 Button(action: {
-                    // Navigate to color closet
+                    navigateToColorCloset = true
                 }) {
                     Text("Color Closet")
                         .underline()
@@ -54,7 +73,7 @@ struct HomeScreen: View {
             }
             .navigationBarItems(trailing:
                                     Button(action: {
-                
+                navigateToColorCloset = true
             }) {
                 Image(systemName: "hanger")
                     .foregroundStyle(.black)
@@ -65,6 +84,10 @@ struct HomeScreen: View {
             )
             .background(
                 ZStack {
+                    NavigationLink(
+                        destination: ColorClosetView(),
+                        isActive: $navigateToColorCloset
+                    ) { EmptyView() }
                     Color.white
                     HStack {
                         ZStack {
@@ -99,11 +122,15 @@ struct HomeScreen: View {
                 }
             )
             .ignoresSafeArea()
+            .background(
+                
+            )
         }
         
     }
     
 }
+
 
 #Preview {
     HomeScreen()

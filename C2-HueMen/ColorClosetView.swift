@@ -1,458 +1,385 @@
 import SwiftUI
 
 struct ColorClosetView: View {
-    // Top Section
-    @State private var topSolidColors: [Color] = [.red, .blue, .green, .yellow, .orange, .purple, .pink]
-    @State private var topMultiColors: [(Color, Color)] = [(.gray, .mint), (.cyan, .brown), (.indigo, .teal), (.black, .white)]
+    enum ClosetSection: String, CaseIterable {
+        case top = "Top"
+        case bottom = "Bottom"
+    }
+
+    @State private var selectedSection: ClosetSection = .top
+
+    // Color States
+    @State private var solidTopColors: [Color] = [.red, .blue, .green, .yellow, .orange, .purple, .pink]
+    @State private var multiTopColors: [(Color, Color)] = [(.gray, .mint), (.cyan, .brown), (.indigo, .teal), (.black, .white)]
     @State private var selectedTopColors: Set<Color> = []
     @State private var selectedTopMultiColors: Set<Int> = []
 
-    // Bottom Section
-    @State private var bottomSolidColors: [Color] = [.red, .blue, .green, .yellow]
-    @State private var bottomMultiColors: [(Color, Color)] = [(.mint, .gray), (.orange, .purple)]
+    @State private var solidBottomColors: [Color] = [.red, .blue, .green, .yellow]
+    @State private var multiBottomColors: [(Color, Color)] = [(.mint, .gray), (.orange, .purple)]
     @State private var selectedBottomColors: Set<Color> = []
     @State private var selectedBottomMultiColors: Set<Int> = []
 
-    // Add Color Sheets
+    // Sheet State
     @State private var showSolidColorPicker = false
     @State private var showMultiColorPicker = false
     @State private var isAddingToTop = true
-
     @State private var newColor: Color = .black
     @State private var newMultiColor1: Color = .gray
     @State private var newMultiColor2: Color = .blue
-    
+
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
         NavigationStack {
-            ScrollView {
-                VStack(spacing: 0) {
-                    //Top section
-                    VStack(alignment: .center) {
-                        HStack {
-                            Image(systemName: "tshirt.circle")
-                                .resizable()
-                                .frame(width: 30, height: 30)
-                            Text("Top Colors")
-                                .font(.title2)
-                                .multilineTextAlignment(.leading)
-                            Spacer()
-                        }
-                        .padding(.horizontal, 6)
-
-                        HStack {
-                            Text("Solid Color")
-                                .font(.system(size: 20, weight: .semibold))
-                                .padding(.horizontal, 6)
-                            Spacer()
-                        }
-                        .padding(.top,1)
-
-                        ColorBlockGrid2(
-                            colors: topSolidColors,
-                            selectedColors: $selectedTopColors,
-                            onAddColor: {
-                                isAddingToTop = true
-                                showSolidColorPicker = true
-                            }
-                        )
-
-                        HStack {
-                            Text("Multi Color")
-                                .font(.system(size: 20, weight: .semibold))
-                                .padding(.horizontal, 6)
-                            Spacer()
-                        }
-                        .padding(.top,30)
-
-                        MultiColorBlockGrid2(
-                            colors: topMultiColors,
-                            selectedIndices: $selectedTopMultiColors,
-                            onAddColor: {
-                                isAddingToTop = true
-                                showMultiColorPicker = true
-                            }
-                        )
+            VStack(spacing: 0) {
+                Picker("Section", selection: $selectedSection) {
+                    ForEach(ClosetSection.allCases, id: \.self) {
+                        Text($0.rawValue)
                     }
-                    .padding(.top, 6.75)
-                    .padding(.bottom, 11.25)
-                    .background(RoundedRectangle(cornerRadius: 12).fill(Color(.systemGray6)))
-        
-
-                    // Bottom section
-                    VStack(alignment: .center) {
-                        HStack {
-                            Image(.bottom2)
-                                .resizable()
-                                .frame(width: 30, height: 38)
-                            Text("Bottom Colors")
-                                .font(.title2)
-                                .multilineTextAlignment(.leading)
-                            Spacer()
-                        }
-                        .padding(.horizontal, 6)
-
-                        HStack {
-                            Text("Solid Color")
-                                .font(.system(size: 20, weight: .semibold))
-                                .padding(.horizontal, 6)
-                            Spacer()
-                        }
-                        .padding(.top,1)
-
-                        ColorBlockGrid2(
-                            colors: bottomSolidColors,
-                            selectedColors: $selectedBottomColors,
-                            onAddColor: {
-                                isAddingToTop = false
-                                showSolidColorPicker = true
-                            }
-                        )
-
-                        HStack {
-                            Text("Multi Color")
-                                .font(.system(size: 20, weight: .semibold))
-                                .padding(.horizontal, 6)
-                            Spacer()
-                        }
-                        .padding(.top,30)
-
-                        MultiColorBlockGrid2(
-                            colors: bottomMultiColors,
-                            selectedIndices: $selectedBottomMultiColors,
-                            onAddColor: {
-                                isAddingToTop = false
-                                showMultiColorPicker = true
-                            }
-                        )
-                    }
-                    .padding(.vertical)
-                    .background(RoundedRectangle(cornerRadius: 12).fill(Color(.systemGray6)))
-                    .padding(.top, 24)
                 }
-                .padding(.horizontal, 14.25)
-                .padding(.top, 20)
+                .pickerStyle(.segmented)
+                .padding()
+
+                ScrollView {
+                    VStack(spacing: 24) {
+                        if selectedSection == .top {
+                            closetSectionView(
+                                icon: Image(systemName: "tshirt.circle"),
+                                title: "Top Colors",
+                                solidColors: $solidTopColors,
+                                selectedColors: $selectedTopColors,
+                                multiColors: $multiTopColors,
+                                selectedMultiIndices: $selectedTopMultiColors,
+                                isTop: true
+                            )
+                        } else {
+                            closetSectionView(
+                                icon: Image(.bottom2),
+                                title: "Bottom Colors",
+                                solidColors: $solidBottomColors,
+                                selectedColors: $selectedBottomColors,
+                                multiColors: $multiBottomColors,
+                                selectedMultiIndices: $selectedBottomMultiColors,
+                                isTop: false
+                            )
+                        }
+                    }
+                    .padding(.horizontal)
+                    .padding(.bottom, 20)
+                }
+                .onChange(of: selectedSection) { newValue in
+                    // Clear selections when switching tab
+                    selectedTopColors.removeAll()
+                    selectedTopMultiColors.removeAll()
+                    selectedBottomColors.removeAll()
+                    selectedBottomMultiColors.removeAll()
+                }
             }
+            .navigationBarTitleDisplayMode(.inline)
+//            .navigationBarBackButtonHidden(true)
+//            .toolbar {
+//                ToolbarItem(placement: .navigationBarLeading) {
+//                    Button(action: { dismiss() }) {
+//                        HStack(spacing: 4) {
+//                            Image(systemName: "chevron.left")
+//                                .font(.system(size: 17, weight: .semibold))
+//                            Text("Back")
+//                                .font(.system(size: 17))
+//                        }
+//                        .foregroundColor(.black)
+//                    }
+//                }
+//            }
             .sheet(isPresented: $showSolidColorPicker) {
                 SolidColorPickerSheet(newColor: $newColor) {
                     if isAddingToTop {
-                        topSolidColors.append(newColor)
+                        solidTopColors.append(newColor)
                     } else {
-                        bottomSolidColors.append(newColor)
+                        solidBottomColors.append(newColor)
                     }
                     showSolidColorPicker = false
                 }
             }
             .sheet(isPresented: $showMultiColorPicker) {
-                MultiColorPickerSheet(
-                    newLeftColor: $newMultiColor1,
-                    newRightColor: $newMultiColor2
-                ) {
+                MultiColorPickerSheet(newLeftColor: $newMultiColor1, newRightColor: $newMultiColor2) {
                     if isAddingToTop {
-                        topMultiColors.append((newMultiColor1, newMultiColor2))
+                        multiTopColors.append((newMultiColor1, newMultiColor2))
                     } else {
-                        bottomMultiColors.append((newMultiColor1, newMultiColor2))
+                        multiBottomColors.append((newMultiColor1, newMultiColor2))
                     }
                     showMultiColorPicker = false
                 }
             }
-            .navigationBarTitleDisplayMode(.inline)
-            .navigationBarBackButtonHidden(true)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button(action: {
-                        dismiss()
-                    }) {
-                        HStack(spacing: 4) {
-                            Image(systemName: "chevron.left")
-                                .font(.system(size: 17, weight: .semibold))
-                            Text("Back")
-                                .font(.system(size: 17))
-                        }
-                        .foregroundColor(.black)
-                    }
-                }
-            }
         }
+    }
+
+    @ViewBuilder
+    private func closetSectionView(
+        icon: Image,
+        title: String,
+        solidColors: Binding<[Color]>,
+        selectedColors: Binding<Set<Color>>,
+        multiColors: Binding<[(Color, Color)]>,
+        selectedMultiIndices: Binding<Set<Int>>,
+        isTop: Bool
+    ) -> some View {
+        VStack(alignment: .leading, spacing: 0) {
+            HStack {
+                icon
+                    .resizable()
+                    .frame(width: 30, height: 30)
+                Text(title)
+                    .font(.title2)
+                    .fontWeight(.semibold)
+                Spacer()
+            }
+            .padding(.leading, 22)
+            .padding(.bottom, 20)
+
+            Text("Solid Color")
+                .font(.headline)
+                .padding(.leading, 22)
+                .padding(.bottom, 10)
+
+            ClosetColorBlockGrid(
+                colors: solidColors,
+                selectedColors: selectedColors,
+                onAddColor: {
+                    isAddingToTop = isTop
+                    showSolidColorPicker = true
+                },
+                onSelect: {
+                    selectedMultiIndices.wrappedValue.removeAll() // Unselect multi when solid is tapped
+                }
+            )
+
+            Text("Multi Color")
+                .font(.headline)
+                .padding(.leading, 22)
+                .padding(.bottom, 10)
+
+            ClosetMultiColorBlockGrid(
+                colors: multiColors,
+                selectedIndices: selectedMultiIndices,
+                onAddColor: {
+                    isAddingToTop = isTop
+                    showMultiColorPicker = true
+                },
+                onSelect: {
+                    selectedColors.wrappedValue.removeAll() // Unselect solid when multi is tapped
+                }
+            )
+
+        }
+        .padding()
     }
 }
 
-
-// MARK: - Reusable Components
-
-//struct SectionTitle: View {
-//    let text: String
-//
-//    var body: some View {
-//        HStack {
-//            Text(text)
-//                .font(.system(size: 20, weight: .semibold))
-//                .padding(.horizontal, 24)
-//            Spacer()
-//        }
-//    }
-//}
-
-//struct ColorBlockGrid3: View {
-//    let colors: [Color]
-//    @Binding var selectedColors: Set<Color>
-//    let columns = 4
-//    var onAddColor: (() -> Void)? = nil
-//
-//    var body: some View {
-//        VStack(spacing: 10) {
-//            let total = colors.count + (onAddColor != nil ? 1 : 0)
-//            ForEach(0..<rowsNeeded(for: total), id: \.self) { row in
-//                HStack(spacing: 10) {
-//                    ForEach(0..<columns, id: \.self) { col in
-//                        let index = row * columns + col
-//                        if index < colors.count {
-//                            let color = colors[index]
-//                            ColorBlock2(
-//                                color: color,
-//                                isSelected: selectedColors.contains(color)
-//                            )
-//                            .onTapGesture {
-//                                if selectedColors.contains(color) {
-//                                    selectedColors.remove(color)
-//                                } else {
-//                                    selectedColors.insert(color)
-//                                }
-//                            }
-//                        } else if index == colors.count, let onAddColor = onAddColor {
-//                            AddColorBlock(action: onAddColor)
-//                        } else {
-//                            Spacer()
-//                        }
-//                    }
-//                }
-//            }
-//        }
-//        .padding(.horizontal, 24)
-//        .padding(.top, 0)
-//    }
-//
-//    private func rowsNeeded(for count: Int) -> Int {
-//        (count + columns - 1) / columns
-//    }
-//}
-
-struct ColorBlockGrid2: View {
-    let colors: [Color]
+struct ClosetColorBlockGrid: View {
+    @Binding var colors: [Color]
     @Binding var selectedColors: Set<Color>
+    let columns = 4
     var onAddColor: (() -> Void)? = nil
-    
-    private let columns = Array(repeating: GridItem(.flexible(), spacing: 32), count: 4)
-    
+    var onSelect: (() -> Void)? = nil // NEW
+
     var body: some View {
-        LazyVGrid(columns: columns, spacing: 17) {
-            ForEach(colors, id: \.self) { color in
-                ColorBlock2(
-                    color: color,
-                    isSelected: selectedColors.contains(color)
-                )
-                .onTapGesture {
-                    if selectedColors.contains(color) {
-                        selectedColors.remove(color)
-                    } else {
-                        selectedColors.insert(color)
+        VStack(spacing: 10) {
+            let total = colors.count + (onAddColor != nil ? 1 : 0)
+            ForEach(0..<rowsNeeded(for: total), id: \.self) { row in
+                HStack(spacing: 10) {
+                    ForEach(0..<columns, id: \.self) { col in
+                        let index = row * columns + col
+                        if index < colors.count {
+                            let color = colors[index]
+                            ClosetColorBlock(
+                                color: color,
+                                isSelected: selectedColors.contains(color),
+                                onDelete: {
+                                    colors.removeAll { $0 == color }
+                                    selectedColors.remove(color)
+                                }
+                            )
+                            .onTapGesture {
+                                if selectedColors.contains(color) {
+                                    selectedColors.removeAll()
+                                } else {
+                                    selectedColors = [color]
+                                    onSelect?() // clear multi
+                                }
+                            }
+                        } else if index == colors.count, let onAddColor = onAddColor {
+                            AddColorBlock(action: onAddColor)
+                        } else {
+                            Spacer()
+                        }
                     }
                 }
             }
-            
-            // Optional Add Color Block
-            if let onAddColor = onAddColor {
-                AddColorBlock2(action: onAddColor)
-            }
         }
-        .padding(.horizontal)
+        .padding(.horizontal, 24)
+        .padding(.bottom, 25)
+    }
+
+    private func rowsNeeded(for count: Int) -> Int {
+        (count + columns - 1) / columns
     }
 }
-//
-struct ColorBlock2: View {
+
+struct ClosetColorBlock: View {
     let color: Color
     let isSelected: Bool
-    
+    var onDelete: (() -> Void)? = nil
+
     var body: some View {
         ZStack {
             Rectangle()
                 .fill(color)
-                .frame(width: 75, height: 58)
+                .frame(width: 80, height: 55)
                 .cornerRadius(10)
                 .overlay(
                     RoundedRectangle(cornerRadius: 10)
-                        .stroke(Color.black.opacity(0.7), lineWidth: 1)
+                        .stroke(isSelected ? Color.blue : Color.gray.opacity(0.3), lineWidth: isSelected ? 2 : 1)
                 )
                 .shadow(color: Color.black.opacity(0.25), radius: 4, x: 0, y: 4)
-        }
-    }
-}
-//
-struct AddColorBlock2: View {
-    let action: () -> Void
-    
-    var body: some View {
-        Button(action: action) {
-            ZStack {
-                Rectangle()
-                    .fill(Color.lightGrayPlusButton)
-                    .frame(width: 75, height: 58)
-                    .cornerRadius(10)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 10)
-                            .stroke(Color.black.opacity(0.7), lineWidth: 1)
-                    )
-                    .shadow(color: Color.black.opacity(0.25), radius: 2, x: 0, y: 4)
-                Image(systemName: "plus")
-                    .font(.system(size: 28, weight: .bold))
-                    .foregroundColor(Color.black.opacity(0.7))
+
+            if isSelected {
+                VStack {
+                    HStack {
+                        Spacer()
+                        Image(systemName: "checkmark.circle.fill")
+                            .foregroundColor(.white)
+                            .background(Circle().fill(Color.blue))
+                            .font(.system(size: 16))
+                            .padding(4)
+                    }
+                    Spacer()
+                    HStack {
+                        Button(action: { onDelete?() }) {
+                            Image(systemName: "trash")
+                                .foregroundColor(.white)
+                                .font(.system(size: 14))
+                                .padding(4)
+                                .background(Color.red)
+                                .clipShape(Circle())
+                        }
+                        .padding(4)
+                        Spacer()
+                    }
+                }
+                .frame(width: 80, height: 55)
             }
         }
     }
 }
-//
-import SwiftUI
 
-struct MultiColorBlockGrid2: View {
-    let colors: [(Color, Color)]
+
+struct ClosetMultiColorBlockGrid: View {
+    @Binding var colors: [(Color, Color)]
     @Binding var selectedIndices: Set<Int>
+    let columns = 4
     var onAddColor: (() -> Void)? = nil
-
-    private let columns = Array(repeating: GridItem(.flexible(), spacing: 32), count: 4)
+    var onSelect: (() -> Void)? = nil // NEW
 
     var body: some View {
-        LazyVGrid(columns: columns, spacing: 12) {
-            ForEach(colors.indices, id: \.self) { index in
-                let colorPair = colors[index]
-                MultiColorBlock2(
-                    leftColor: colorPair.0,
-                    rightColor: colorPair.1,
-                    isSelected: selectedIndices.contains(index)
-                )
-                .onTapGesture {
-                    if selectedIndices.contains(index) {
-                        selectedIndices.remove(index)
-                    } else {
-                        selectedIndices.insert(index)
+        VStack(spacing: 10) {
+            let total = colors.count + (onAddColor != nil ? 1 : 0)
+            ForEach(0..<rowsNeeded(for: total), id: \.self) { row in
+                HStack(spacing: 10) {
+                    ForEach(0..<columns, id: \.self) { col in
+                        let index = row * columns + col
+                        if index < colors.count {
+                            let colorPair = colors[index]
+                            ClosetMultiColorBlock(
+                                leftColor: colorPair.0,
+                                rightColor: colorPair.1,
+                                isSelected: selectedIndices.contains(index),
+                                onDelete: {
+                                    colors.remove(at: index)
+                                    selectedIndices.remove(index)
+                                }
+                            )
+                            .onTapGesture {
+                                if selectedIndices.contains(index) {
+                                    selectedIndices.removeAll()
+                                } else {
+                                    selectedIndices = [index]
+                                    onSelect?() // clear solid
+                                }
+                            }
+                        } else if index == colors.count, let onAddColor = onAddColor {
+                            AddColorBlock(action: onAddColor)
+                        } else {
+                            Spacer()
+                        }
                     }
                 }
             }
-
-            if let onAddColor = onAddColor {
-                AddColorBlock2(action: onAddColor)
-            }
         }
-        .padding(.horizontal)
+        .padding(.horizontal, 24)
+    }
+
+    private func rowsNeeded(for count: Int) -> Int {
+        (count + columns - 1) / columns
     }
 }
 
 
-struct MultiColorBlock2: View {
+struct ClosetMultiColorBlock: View {
     let leftColor: Color
     let rightColor: Color
     let isSelected: Bool
+    var onDelete: (() -> Void)? = nil
 
     var body: some View {
         ZStack {
+            // Background: dua warna
             HStack(spacing: 0) {
-                Rectangle()
-                    .fill(leftColor)
-                Rectangle()
-                    .fill(rightColor)
+                Rectangle().fill(leftColor)
+                Rectangle().fill(rightColor)
             }
-            .frame(width: 75, height: 55)
+            .frame(width: 80, height: 55)
             .cornerRadius(10)
             .overlay(
                 RoundedRectangle(cornerRadius: 10)
-                    .stroke(Color.black.opacity(0.7), lineWidth: 1)
+                    .stroke(isSelected ? Color.blue : Color.gray.opacity(0.3), lineWidth: isSelected ? 2 : 1)
             )
             .shadow(color: Color.black.opacity(0.25), radius: 4, x: 0, y: 4)
+
+            // Overlay Icons
+            if isSelected {
+                VStack {
+                    HStack {
+                        Spacer()
+                        Image(systemName: "checkmark.circle.fill")
+                            .foregroundColor(.white)
+                            .background(Circle().fill(Color.blue))
+                            .font(.system(size: 16))
+                            .padding(4)
+                    }
+                    Spacer()
+                    HStack {
+                        Button(action: { onDelete?() }) {
+                            Image(systemName: "trash")
+                                .foregroundColor(.white)
+                                .font(.system(size: 14))
+                                .padding(4)
+                                .background(Color.red)
+                                .clipShape(Circle())
+                        }
+                        .padding(4)
+                        Spacer()
+                    }
+                }
+                .frame(width: 80, height: 55) // Match block size
+            }
         }
     }
 }
-//
-//struct SolidColorPickerSheet: View {
-//    @Binding var newColor: Color
-//    var onAdd: () -> Void
-//
-//    var body: some View {
-//        VStack(spacing: 16) {
-//            Capsule()
-//                .fill(Color.secondary.opacity(0.3))
-//                .frame(width: 40, height: 5)
-//                .padding(.bottom, 8)
-//
-//            Text("Add New Solid Color")
-//                .font(.headline)
-//                .padding(.bottom, 15)
-//
-//            ColorPicker("", selection: $newColor, supportsOpacity: false)
-//                .labelsHidden()
-//                .scaleEffect(1.5)
-//                .padding(.horizontal, 32)
-//                .padding(.bottom, 15)
-//
-//            Button("Add Color", action: onAdd)
-//                .fontWeight(.semibold)
-//                .frame(maxWidth: .infinity)
-//                .padding()
-//                .background(Color.blue)
-//                .foregroundColor(.white)
-//                .cornerRadius(12)
-//                .padding(.horizontal, 24)
-//                .padding(.bottom, 16)
-//        }
-//        .presentationDetents([.height(220)])
-//    }
-//}
-//
-//struct MultiColorPickerSheet: View {
-//    @Binding var newLeftColor: Color
-//    @Binding var newRightColor: Color
-//    var onAdd: () -> Void
-//
-//    var body: some View {
-//        VStack(spacing: 16) {
-//            Capsule()
-//                .fill(Color.secondary.opacity(0.3))
-//                .frame(width: 40, height: 5)
-//                .padding(.top, 8)
-//
-//            Text("Add New Multi Color")
-//                .font(.headline)
-//
-//            VStack(spacing: 12) {
-//                HStack {
-//                    Text("Color 1")
-//                    ColorPicker("", selection: $newLeftColor, supportsOpacity: false)
-//                        .labelsHidden()
-//                }
-//                HStack {
-//                    Text("Color 2")
-//                    ColorPicker("", selection: $newRightColor, supportsOpacity: false)
-//                        .labelsHidden()
-//                }
-//            }
-//            .padding(.horizontal, 32)
-//            .padding(.vertical, 12)
-//
-//            Button("Add Color", action: onAdd)
-//                .fontWeight(.semibold)
-//                .frame(maxWidth: .infinity)
-//                .padding()
-//                .background(Color.blue)
-//                .foregroundColor(.white)
-//                .cornerRadius(12)
-//                .padding(.horizontal, 24)
-//                .padding(.bottom, 16)
-//        }
-//        .presentationDetents([.height(250)])
-//    }
-//}
 
 
-// MARK: - Preview
+
+
+
 
 #Preview {
     ColorClosetView()

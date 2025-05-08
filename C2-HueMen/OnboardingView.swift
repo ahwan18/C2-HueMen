@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct OnboardingView: View {
+    var onSetupComplete: (() -> Void)? = nil
     var body: some View {
         NavigationStack {
             VStack {
@@ -34,7 +35,7 @@ struct OnboardingView: View {
                 .padding(.bottom, 30)
                 
                 
-                NavigationLink(destination: SelectTopColorsView()) {
+                NavigationLink(destination: SelectTopColorsView(onSetupComplete: onSetupComplete)) {
                     Text("Start")
                         .font(.headline)
                         .foregroundStyle(.white)

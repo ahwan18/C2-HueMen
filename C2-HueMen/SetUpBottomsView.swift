@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct SelectBottomColorsView: View {
+    var onSetupComplete: (() -> Void)? = nil
     @State private var solidBottomColors: [Color] = [
         .white, .black, .gray, Color(red: 0.0, green: 0.2, blue: 0.4), // navy
         Color(red: 0.7, green: 0.85, blue: 1.0), // light blue
@@ -27,7 +28,7 @@ struct SelectBottomColorsView: View {
     @State private var newMultiBottomColor1: Color = .gray
     @State private var newMultiBottomColor2: Color = .blue
     
-    @State private var navigateToHomeScreen = false
+    @State private var navigateToHome = false
 
     var body: some View {
         NavigationStack {
@@ -69,7 +70,14 @@ struct SelectBottomColorsView: View {
                 )
                 Spacer()
                 
-                NavigationLink(destination: HomeScreen()) {
+                NavigationLink(destination: HomeScreen(), isActive: $navigateToHome) {
+                    EmptyView()
+                }
+                Button(action: {
+                    UserDefaults.standard.set(true, forKey: "hasCompletedSetup")
+                    onSetupComplete?()
+                    navigateToHome = true
+                }) {
                     Text("Save")
                         .font(.system(size: 20))
                         .foregroundColor(.white)

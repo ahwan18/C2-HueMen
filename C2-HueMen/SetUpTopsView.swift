@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct SelectTopColorsView: View {
+    var onSetupComplete: (() -> Void)? = nil
     @State private var solidColors: [Color] = [
         .white, .black, .gray, Color(red: 0.0, green: 0.2, blue: 0.4), // navy
         Color(red: 0.7, green: 0.85, blue: 1.0), // light blue
@@ -74,7 +75,7 @@ struct SelectTopColorsView: View {
                 
                 Spacer()
                 
-                NavigationLink(destination: SelectBottomColorsView(), isActive: $navigateToBottoms) {
+                NavigationLink(destination: SelectBottomColorsView(onSetupComplete: onSetupComplete), isActive: $navigateToBottoms) {
                     EmptyView()
                 }
                 

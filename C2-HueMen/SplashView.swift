@@ -9,10 +9,17 @@ import SwiftUI
 
 struct SplashScreen: View {
     @State private var isActive = false
+    @State private var hasCompletedSetup = UserDefaults.standard.bool(forKey: "hasCompletedSetup")
 
     var body: some View {
         if isActive {
-            OnboardingView() // ganti ke halaman berikutnya setelah splash
+            if hasCompletedSetup {
+                HomeScreen()
+            } else {
+                OnboardingView(onSetupComplete: {
+                    hasCompletedSetup = true
+                })
+            }
         } else {
             VStack {
                 Spacer()

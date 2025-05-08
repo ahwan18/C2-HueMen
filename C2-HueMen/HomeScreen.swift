@@ -103,7 +103,7 @@ struct HomeScreen: View {
             )
             .navigationDestination(isPresented: $navigateToColorCloset) {
                 ColorClosetSegmentedView()
-            }
+                }
             .background(
                 ZStack {
                     HStack {

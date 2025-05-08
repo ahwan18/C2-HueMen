@@ -8,8 +8,17 @@
 import SwiftUI
 
 struct SelectBottomColorsView: View {
-    @State private var solidBottomColors: [Color] = [.black, .blue, .gray, .brown, .green, .purple, .red]
-    @State private var multiBottomColors: [(Color, Color)] = [(.gray, .black), (.blue, .white), (.brown, .yellow), (.purple, .pink)]
+    @State private var solidBottomColors: [Color] = [
+        .white, .black, .gray, Color(red: 0.0, green: 0.2, blue: 0.4), // navy
+        Color(red: 0.7, green: 0.85, blue: 1.0), // light blue
+        .brown
+    ]
+    @State private var multiBottomColors: [(Color, Color)] = [
+        (.white, .blue),
+        (.gray, .black),
+        (.blue, Color(red: 0.7, green: 0.85, blue: 1.0)), // blue & light blue
+        (.white, .gray)
+    ]
     @State private var selectedBottomColors: Set<Color> = []
     @State private var selectedMultiBottomColors: Set<Int> = []
     @State private var showSolidColorPicker = false
@@ -30,11 +39,11 @@ struct SelectBottomColorsView: View {
                 .font(.system(size: 17))
                 .foregroundColor(.gray)
                 .multilineTextAlignment(.center)
-                .padding(.top, 4)
-                .padding(.horizontal, 24)
+                .padding(.top, 1)
+                .padding(.horizontal, 18)
             // Solid Color Section
             SectionTitle(text: "Solid Color")
-                .padding(.top, 35)
+                .padding(.top, 30)
             ColorBlockGrid(
                 colors: solidBottomColors,
                 selectedColors: $selectedBottomColors,
@@ -56,7 +65,8 @@ struct SelectBottomColorsView: View {
             Button(action: {
                 // Action for continue
             }) {
-                Text("Continue")
+                Text("Save")
+                    .font(.system(size: 20))
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity)
                     .padding()
@@ -68,6 +78,7 @@ struct SelectBottomColorsView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color.white.ignoresSafeArea())
+        .navigationBarBackButtonHidden(true)
         .sheet(isPresented: $showSolidColorPicker) {
             SolidColorPickerSheet(newColor: $newBottomColor) {
                 solidBottomColors.append(newBottomColor)

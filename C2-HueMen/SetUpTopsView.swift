@@ -1,8 +1,17 @@
 import SwiftUI
 
 struct SelectTopColorsView: View {
-    @State private var solidColors: [Color] = [.red, .blue, .green, .yellow, .orange, .purple, .pink]
-    @State private var multiColors: [(Color, Color)] = [(.gray, .mint), (.cyan, .brown), (.indigo, .teal), (.black, .white)]
+    @State private var solidColors: [Color] = [
+        .white, .black, .gray, Color(red: 0.0, green: 0.2, blue: 0.4), // navy
+        Color(red: 0.7, green: 0.85, blue: 1.0), // light blue
+        .brown
+    ]
+    @State private var multiColors: [(Color, Color)] = [
+        (.white, .blue),
+        (.gray, .black),
+        (.blue, Color(red: 0.7, green: 0.85, blue: 1.0)), // blue & light blue
+        (.white, .gray)
+    ]
     @State private var selectedColors: Set<Color> = []
     @State private var selectedMultiColors: Set<Int> = []
     @State private var showSolidColorPicker = false
@@ -12,6 +21,7 @@ struct SelectTopColorsView: View {
     @State private var newMultiColor2: Color = .blue
     @State private var showActualColorPicker = false
     @State private var colorPickerTarget: ColorPickerTarget = .solid
+    @State private var navigateToBottoms = false
 
     enum ColorPickerTarget {
         case solid
@@ -20,76 +30,81 @@ struct SelectTopColorsView: View {
     }
 
     var body: some View {
-        VStack {
-            Spacer().frame(height: 40)
-            
-            // Title
-            Text("Select Colors of Tops You Have")
-                .font(.system(size: 22, weight: .bold))
-                .multilineTextAlignment(.center)
-            
-            // Subtitle
-            Text("'Top' refers to clothing worn on the upper body such as shirt, T-shirt, jacket, etc")
-                .font(.system(size: 17))
-                .foregroundColor(.gray)
-                .multilineTextAlignment(.center)
-                .padding(.top, 4)
-                .padding(.horizontal, 24)
-            
-            // Solid Color Section
-            SectionTitle(text: "Solid Color")
-                .padding(.top, 35)
-            ColorBlockGrid(
-                colors: solidColors,
-                selectedColors: $selectedColors,
-                onAddColor: {
-                    showSolidColorPicker = true
+        NavigationStack {
+            VStack {
+                Spacer().frame(height: 40)
+                
+                // Title
+                Text("Select Colors of Tops You Have")
+                    .font(.system(size: 22, weight: .bold))
+                    .multilineTextAlignment(.center)
+                
+                // Subtitle
+                Text("'Top' refers to clothing worn on the upper body such as shirt, T-shirt, jacket, etc")
+                    .font(.system(size: 17))
+                    .foregroundColor(.gray)
+                    .multilineTextAlignment(.center)
+                    .padding(.top, 1)
+                    .padding(.horizontal, 18)
+                
+                // Solid Color Section
+                SectionTitle(text: "Solid Color")
+                    .padding(.top, 30)
+                ColorBlockGrid(
+                    colors: solidColors,
+                    selectedColors: $selectedColors,
+                    onAddColor: {
+                        showSolidColorPicker = true
+                    }
+                )
+             
+                // Multi Color Section
+                SectionTitle(text: "Multi Color")
+                    .padding(.top, 35)
+                MultiColorBlockGrid(
+                    colors: multiColors,
+                    selectedIndices: $selectedMultiColors,
+                    onAddColor: {
+                        showMultiColorPicker = true
+                    }
+                )
+                
+                Spacer()
+                
+                NavigationLink(destination: SelectBottomColorsView(), isActive: $navigateToBottoms) {
+                    EmptyView()
                 }
-            )
-            
-            // Multi Color Section
-            SectionTitle(text: "Multi Color")
-                .padding(.top, 35)
-            MultiColorBlockGrid(
-                colors: multiColors,
-                selectedIndices: $selectedMultiColors,
-                onAddColor: {
-                    showMultiColorPicker = true
+                
+                Button(action: {
+                    navigateToBottoms = true
+                }) {
+                    Text("Continue")
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(Color.black)
+                        .cornerRadius(14)
                 }
-            )
-            
-            Spacer()
-            
-            // Continue Button
-            Button(action: {
-                // Action for continue
-            }) {
-                Text("Continue")
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color.black)
-                    .cornerRadius(14)
+                .padding(.horizontal, 16)
+                .padding(.bottom, 32)
             }
-            .padding(.horizontal, 16)
-            .padding(.bottom, 32)
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color.white.ignoresSafeArea())
-        .sheet(isPresented: $showSolidColorPicker) {
-            SolidColorPickerSheet(newColor: $newColor) {
-                solidColors.append(newColor)
-                showSolidColorPicker = false
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(Color.white.ignoresSafeArea())
+            .sheet(isPresented: $showSolidColorPicker) {
+                SolidColorPickerSheet(newColor: $newColor) {
+                    solidColors.append(newColor)
+                    showSolidColorPicker = false
+                }
             }
-        }
 
-        .sheet(isPresented: $showMultiColorPicker) {
-            MultiColorPickerSheet(
-                newLeftColor: $newMultiColor1,
-                newRightColor: $newMultiColor2
-            ) {
-                multiColors.append((newMultiColor1, newMultiColor2))
-                showMultiColorPicker = false
+            .sheet(isPresented: $showMultiColorPicker) {
+                MultiColorPickerSheet(
+                    newLeftColor: $newMultiColor1,
+                    newRightColor: $newMultiColor2
+                ) {
+                    multiColors.append((newMultiColor1, newMultiColor2))
+                    showMultiColorPicker = false
+                }
             }
         }
     }
@@ -147,6 +162,7 @@ struct ColorBlockGrid: View {
         }
         .padding(.horizontal, 24)
         .padding(.top, 0)
+        .padding(.bottom, 25)
     }
 
     private func rowsNeeded(for count: Int) -> Int {
@@ -165,9 +181,8 @@ struct ColorBlock: View {
                 .frame(width: 80, height: 55)
                 .cornerRadius(10)
                 .overlay(
-                    Rectangle()
+                    RoundedRectangle(cornerRadius: 10)
                         .stroke(isSelected ? Color.blue : Color.gray.opacity(0.3), lineWidth: isSelected ? 2 : 1)
-                        .cornerRadius(10)
                 )
                 .shadow(color: Color.black.opacity(0.25), radius: 4, x: 0, y: 4)
             if isSelected {

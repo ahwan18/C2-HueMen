@@ -11,6 +11,7 @@ struct RecommendationView: View {
         case top // user memilih warna pants (bottom)
         case bottom // user memilih warna baju (top)
     }
+    
     enum SectionTitle: String {
         case top = "Top Colors"
         case bottom = "Bottom Colors"
@@ -32,92 +33,99 @@ struct RecommendationView: View {
     let topOptions: [Color] = [.brown, .white, .black, .gray, .blue]
 
     var body: some View {
-        VStack(spacing: 24) {
-            // Header
-            VStack(spacing: 6) {
-                Text(mode == .top ? SectionTitle.bottom.rawValue : SectionTitle.top.rawValue)
-                    .font(.title2)
-                    .fontWeight(.bold)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                Spacer().frame(height: 12)
-            }
-            .padding(.horizontal)
-
-            // Shirt and Pants Preview
-            ZStack {
-                RoundedRectangle(cornerRadius: 16)
-                    .fill(Color(.systemGray6))
-                    .shadow(radius: 2)
-                    .frame(height: 370)
-                VStack(spacing: 0) {
-                    Image(systemName: "tshirt.fill")
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
-                        .frame(width: 125, height: 120)
-                        .foregroundColor(topColor)
-                        .padding(.bottom, 0)
-                    PantsShape(leftWidthRatio: leftWidthRatio, rightWidthRatio: rightWidthRatio)
-                        .fill(bottomColor)
-                        .frame(width: 70, height: 145)
+        ZStack {
+            Color.white.ignoresSafeArea()
+            VStack(spacing: 24) {
+                // Header
+                VStack(spacing: 6) {
+                    Text(mode == .top ? SectionTitle.bottom.rawValue : SectionTitle.top.rawValue)
+                        .foregroundStyle(.black)
+                        .font(.title2)
+                        .fontWeight(.bold)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    Spacer().frame(height: 12)
                 }
-            }
-            .padding(.horizontal)
+                .padding(.horizontal)
 
-            // Compatibility Palette
-            VStack(alignment: .leading, spacing: 12) {
-                Text("Most compatible:")
-                    .fontWeight(.semibold)
-                HStack {
-                    if mode == .top {
-                        ColorBlocks(color: bottomOptions.first ?? .clear, isSelected: selectedBottomIndex == 0)
-                            .onTapGesture {
-                                bottomColor = bottomOptions.first ?? .clear
-                                selectedBottomIndex = 0
-                            }
-                    } else {
-                        ColorBlocks(color: topOptions.first ?? .clear, isSelected: selectedTopIndex == 0)
-                            .onTapGesture {
-                                topColor = topOptions.first ?? .clear
-                                selectedTopIndex = 0
-                            }
+                // Shirt and Pants Preview
+                ZStack {
+                    RoundedRectangle(cornerRadius: 16)
+                        .fill(Color(.backgroundRecommendation))
+                        .shadow(radius: 2)
+                        .frame(height: 370)
+                    VStack(spacing: 0) {
+                        Image(systemName: "tshirt.fill")
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .frame(width: 125, height: 120)
+                            .foregroundColor(topColor)
+                            .padding(.bottom, 0)
+                        PantsShape(leftWidthRatio: leftWidthRatio, rightWidthRatio: rightWidthRatio)
+                            .fill(bottomColor)
+                            .frame(width: 70, height: 145)
                     }
                 }
-                Text("Compatible colors:")
-                HStack(spacing: 16) {
-                    if mode == .top {
-                        CompatibleBottomColorsView(
-                            bottomOptions: bottomOptions,
-                            selectedBottomIndex: $selectedBottomIndex,
-                            bottomColor: $bottomColor
-                        )
-                    } else {
-                        CompatibleTopColorsView(
-                            topOptions: topOptions,
-                            selectedTopIndex: $selectedTopIndex,
-                            topColor: $topColor
-                        )
+                .padding(.horizontal)
+
+                // Compatibility Palette
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("Most compatible:")
+                        .fontWeight(.semibold)
+                        .foregroundStyle(.black)
+                    HStack {
+                        if mode == .top {
+                            ColorBlocks(color: bottomOptions.first ?? .clear, isSelected: selectedBottomIndex == 0)
+                                .onTapGesture {
+                                    bottomColor = bottomOptions.first ?? .clear
+                                    selectedBottomIndex = 0
+                                }
+                        } else {
+                            ColorBlocks(color: topOptions.first ?? .clear, isSelected: selectedTopIndex == 0)
+                                .onTapGesture {
+                                    topColor = topOptions.first ?? .clear
+                                    selectedTopIndex = 0
+                                }
+                        }
+                    }
+                    Text("Compatible colors:")
+                        .foregroundStyle(.black)
+                    HStack(spacing: 16) {
+                        if mode == .top {
+                            CompatibleBottomColorsView(
+                                bottomOptions: bottomOptions,
+                                selectedBottomIndex: $selectedBottomIndex,
+                                bottomColor: $bottomColor
+                            )
+                        } else {
+                            CompatibleTopColorsView(
+                                topOptions: topOptions,
+                                selectedTopIndex: $selectedTopIndex,
+                                topColor: $topColor
+                            )
+                        }
                     }
                 }
-            }
-            .padding()
-            .background(Color(.systemGray6))
-            .cornerRadius(16)
-            .shadow(radius: 2)
-            .padding(.horizontal)
+                .padding()
+                .background(Color(.backgroundRecommendation))
+                .cornerRadius(16)
+                .shadow(radius: 2)
+                .padding(.horizontal)
 
-            // Done button
-            Button("Done") {
-                // Action here
+                // Done button
+                Button("Done") {
+                    // Action here
+                }
+                .foregroundColor(.white)
+                .frame(maxWidth: .infinity)
+                .padding()
+                .background(Color.black)
+                .cornerRadius(10)
+                .padding(.horizontal)
             }
-            .foregroundColor(.white)
-            .frame(maxWidth: .infinity)
-            .padding()
-            .background(Color.black)
-            .cornerRadius(10)
-            .padding(.horizontal)
+            .padding(.top)
+            .preferredColorScheme(.light)
         }
-        .padding(.top)
-    }
+     }
 }
 
 struct ColorBlocks: View {

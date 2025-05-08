@@ -18,6 +18,7 @@ struct HomeScreen: View {
                 Spacer()
                 
                 Text("What color are you planning to wear today?")
+                    .foregroundStyle(.black)
                     .font(.title)
                     .fontWeight(.bold)
                     .multilineTextAlignment(.center)
@@ -128,7 +129,7 @@ struct HomeScreen: View {
             )
             .ignoresSafeArea()
             .background(
-                
+                Color(.white)
             )
         }
         

@@ -69,9 +69,9 @@ struct ColorClosetView: View {
                     // Bottom Section
                     VStack(alignment: .center) {
                         HStack {
-                            Image(systemName: "figure.walk.circle")
+                            Image(.name6RemovebgPreview)
                                 .resizable()
-                                .frame(width: 30, height: 30)
+                                .frame(width: 30, height: 38)
                             Text("Bottom Colors")
                                 .font(.title2)
                                 .multilineTextAlignment(.leading)

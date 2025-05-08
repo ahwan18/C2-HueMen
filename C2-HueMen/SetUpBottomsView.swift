@@ -32,6 +32,7 @@ struct SelectBottomColorsView: View {
             Spacer().frame(height: 40)
             // Title
             Text("Select Colors of Bottoms You Have")
+                .foregroundStyle(.black)
                 .font(.system(size: 22, weight: .bold))
                 .multilineTextAlignment(.center)
             // Subtitle
@@ -44,6 +45,7 @@ struct SelectBottomColorsView: View {
             // Solid Color Section
             SectionTitle(text: "Solid Color")
                 .padding(.top, 30)
+                .foregroundStyle(.black)
             ColorBlockGrid(
                 colors: solidBottomColors,
                 selectedColors: $selectedBottomColors,
@@ -54,6 +56,7 @@ struct SelectBottomColorsView: View {
             // Multi Color Section
             SectionTitle(text: "Multi Color")
                 .padding(.top, 35)
+                .foregroundStyle(.black)
             MultiColorBlockGrid(
                 colors: multiBottomColors,
                 selectedIndices: $selectedMultiBottomColors,

@@ -38,6 +38,7 @@ struct SelectTopColorsView: View {
                 Text("Select Colors of Tops You Have")
                     .font(.system(size: 22, weight: .bold))
                     .multilineTextAlignment(.center)
+                    .foregroundStyle(.black)
                 
                 // Subtitle
                 Text("'Top' refers to clothing worn on the upper body such as shirt, T-shirt, jacket, etc")
@@ -50,6 +51,7 @@ struct SelectTopColorsView: View {
                 // Solid Color Section
                 SectionTitle(text: "Solid Color")
                     .padding(.top, 30)
+                    .foregroundStyle(.black)
                 ColorBlockGrid(
                     colors: solidColors,
                     selectedColors: $selectedColors,
@@ -61,6 +63,7 @@ struct SelectTopColorsView: View {
                 // Multi Color Section
                 SectionTitle(text: "Multi Color")
                     .padding(.top, 35)
+                    .foregroundStyle(.black)
                 MultiColorBlockGrid(
                     colors: multiColors,
                     selectedIndices: $selectedMultiColors,

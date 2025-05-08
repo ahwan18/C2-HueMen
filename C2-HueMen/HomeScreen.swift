@@ -91,7 +91,7 @@ struct HomeScreen: View {
             }
             )
             .navigationDestination(isPresented: $navigateToColorCloset) {
-                    ColorClosetView()
+                    ColorClosetSegmentedView()
                 }
             .background(
                 ZStack {

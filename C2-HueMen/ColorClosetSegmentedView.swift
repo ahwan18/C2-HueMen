@@ -55,8 +55,10 @@ struct ColorClosetSegmentedView: View {
                             onSelect: {
                                 if selectedSection == .top {
                                     resetBottomSelections()
+                                    selectedMultiTopIndex = nil // ✅ clear multi if solid selected
                                 } else {
                                     resetTopSelections()
+                                    selectedMultiBottomIndex = nil
                                 }
                             }
                         )
@@ -73,8 +75,10 @@ struct ColorClosetSegmentedView: View {
                             onSelect: {
                                 if selectedSection == .top {
                                     resetBottomSelections()
+                                    selectedTopColor = nil // ✅ clear solid if multi selected
                                 } else {
                                     resetTopSelections()
+                                    selectedBottomColor = nil
                                 }
                             }
                         )
@@ -119,7 +123,7 @@ struct ColorClosetSegmentedView: View {
 struct ColorBlockGridSingleSelect: View {
     let colors: [Color]
     @Binding var selectedColor: Color?
-    var onSelect: () -> Void = {}
+    var onSelect: () -> Void = {} // ✅ tambahkan closure
 
     var body: some View {
         LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 16), count: 4), spacing: 16) {
@@ -137,7 +141,7 @@ struct ColorBlockGridSingleSelect: View {
                 }
                 .onTapGesture {
                     selectedColor = (selectedColor == color) ? nil : color
-                    onSelect()
+                    onSelect() // ✅ reset multi color
                 }
             }
         }
@@ -148,7 +152,7 @@ struct ColorBlockGridSingleSelect: View {
 struct MultiColorBlockGridSingleSelect: View {
     let colors: [(Color, Color)]
     @Binding var selectedIndex: Int?
-    var onSelect: () -> Void = {}
+    var onSelect: () -> Void = {} // ✅
 
     var body: some View {
         LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 16), count: 4), spacing: 16) {
@@ -169,7 +173,7 @@ struct MultiColorBlockGridSingleSelect: View {
                 }
                 .onTapGesture {
                     selectedIndex = (selectedIndex == index) ? nil : index
-                    onSelect()
+                    onSelect() // ✅ reset solid color
                 }
             }
         }

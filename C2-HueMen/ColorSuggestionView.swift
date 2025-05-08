@@ -117,7 +117,7 @@ struct RecommendationView: View {
                 
                 // Done button
                 Button("Done") {
-                    // Action here
+                        //
                 }
                 .foregroundColor(.white)
                 .frame(maxWidth: .infinity)
@@ -127,7 +127,6 @@ struct RecommendationView: View {
                 .padding(.horizontal)
             }
             .padding(.top)
-            .preferredColorScheme(.light)
             .onAppear {
                 // Set the initial color based on uploadType
                 if uploadType == .top {

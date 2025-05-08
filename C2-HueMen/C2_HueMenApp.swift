@@ -14,6 +14,7 @@ struct C2_HueMenApp: App {
         WindowGroup {
 //            CameraColorDetectorView(uploadType: .top)
             SplashScreen()
+                .preferredColorScheme(.light)
         }
     }
 }

@@ -10,10 +10,18 @@ struct SelectTopColorsView: View {
     @State private var newColor: Color = .black
     @State private var newMultiColor1: Color = .gray
     @State private var newMultiColor2: Color = .blue
+    @State private var showActualColorPicker = false
+    @State private var colorPickerTarget: ColorPickerTarget = .solid
+
+    enum ColorPickerTarget {
+        case solid
+        case multiLeft
+        case multiRight
+    }
 
     var body: some View {
         VStack {
-            Spacer().frame(height: 60)
+            Spacer().frame(height: 40)
             
             // Title
             Text("Select Colors of Tops You Have")

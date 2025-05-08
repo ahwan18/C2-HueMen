@@ -12,7 +12,7 @@ import SwiftData
 struct C2_HueMenApp: App {
     var body: some Scene {
         WindowGroup {
-            SelectTopColorsView()
+            HomeScreen()
         }
     }
 }

@@ -10,6 +10,7 @@ import SwiftUI
 struct HomeScreen: View {
     @State private var navigateToColorCloset = false
     @State private var showUploadOptions = false
+    @State private var selectedUploadType: UploadType?
     
     var body: some View {
         NavigationStack {
@@ -45,18 +46,24 @@ struct HomeScreen: View {
                 .padding(.horizontal, 40)
                 .confirmationDialog("", isPresented: $showUploadOptions, titleVisibility: .hidden) {
                     Button {
-                        // Action utk Upload Top
+                        selectedUploadType = .top
                     } label: {
                         Label("Upload Top", systemImage: "tshirt")
                     }
+                    .navigationDestination(for: UploadType.self) { type in
+                        CameraColorDetectorView(uploadType: type)
+                    }
                     
                     Button {
-                        // Action utk Upload Bottom
+                        selectedUploadType = .bottom
                     } label: {
                         Label("Upload Bottom", systemImage: "figure.walk")
                     }
                     
                     Button("Cancel", role: .cancel) {}
+                }
+                .navigationDestination(item: $selectedUploadType) { type in
+                    CameraColorDetectorView(uploadType: type)
                 }
                 
                 

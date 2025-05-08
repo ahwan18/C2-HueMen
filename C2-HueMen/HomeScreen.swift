@@ -11,6 +11,7 @@ struct HomeScreen: View {
     @State private var navigateToColorCloset = false
     @State private var showUploadOptions = false
     @State private var selectedUploadType: UploadType?
+    @State private var navigateToColorSegmented = false
     
     var body: some View {
         NavigationStack {
@@ -76,7 +77,7 @@ struct HomeScreen: View {
                     .foregroundStyle(.black)
                 
                 Button(action: {
-                    navigateToColorCloset = true
+                    navigateToColorSegmented = true
                 }) {
                     Text("Pick from wardrobe")
                         .foregroundColor(.white)
@@ -87,6 +88,9 @@ struct HomeScreen: View {
                         .shadow(radius: 4, y: 2)
                 }
                 .padding(.horizontal, 40)
+                .navigationDestination(isPresented: $navigateToColorSegmented) {
+                    ColorClosetSegmentedView()
+                    }
                 
                 Spacer()
             }
@@ -102,8 +106,9 @@ struct HomeScreen: View {
             }
             )
             .navigationDestination(isPresented: $navigateToColorCloset) {
-                ColorClosetSegmentedView()
+                ColorClosetView()
                 }
+            
             .background(
                 ZStack {
                     HStack {
@@ -143,6 +148,7 @@ struct HomeScreen: View {
                 Color(.white)
             )
         }
+        .navigationBarBackButtonHidden()
         
     }
     

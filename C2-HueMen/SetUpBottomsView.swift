@@ -26,75 +26,78 @@ struct SelectBottomColorsView: View {
     @State private var newBottomColor: Color = .black
     @State private var newMultiBottomColor1: Color = .gray
     @State private var newMultiBottomColor2: Color = .blue
+    
+    @State private var navigateToHomeScreen = false
 
     var body: some View {
-        VStack {
-            Spacer().frame(height: 40)
-            // Title
-            Text("Select Colors of Bottoms You Have")
-                .foregroundStyle(.black)
-                .font(.system(size: 22, weight: .bold))
-                .multilineTextAlignment(.center)
-            // Subtitle
-            Text("'Bottom' refers to clothing worn on the lower body such as pants, skirt, shorts, etc")
-                .font(.system(size: 17))
-                .foregroundColor(.gray)
-                .multilineTextAlignment(.center)
-                .padding(.top, 1)
-                .padding(.horizontal, 18)
-            // Solid Color Section
-            SectionTitle(text: "Solid Color")
-                .padding(.top, 30)
-                .foregroundStyle(.black)
-            ColorBlockGrid(
-                colors: solidBottomColors,
-                selectedColors: $selectedBottomColors,
-                onAddColor: {
-                    showSolidColorPicker = true
+        NavigationStack {
+            VStack {
+                Spacer().frame(height: 40)
+                // Title
+                Text("Select Colors of Bottoms You Have")
+                    .foregroundStyle(.black)
+                    .font(.system(size: 22, weight: .bold))
+                    .multilineTextAlignment(.center)
+                // Subtitle
+                Text("'Bottom' refers to clothing worn on the lower body such as pants, skirt, shorts, etc")
+                    .font(.system(size: 17))
+                    .foregroundColor(.gray)
+                    .multilineTextAlignment(.center)
+                    .padding(.top, 1)
+                    .padding(.horizontal, 18)
+                // Solid Color Section
+                SectionTitle(text: "Solid Color")
+                    .padding(.top, 30)
+                    .foregroundStyle(.black)
+                ColorBlockGrid(
+                    colors: solidBottomColors,
+                    selectedColors: $selectedBottomColors,
+                    onAddColor: {
+                        showSolidColorPicker = true
+                    }
+                )
+                // Multi Color Section
+                SectionTitle(text: "Multi Color")
+                    .padding(.top, 35)
+                    .foregroundStyle(.black)
+                MultiColorBlockGrid(
+                    colors: multiBottomColors,
+                    selectedIndices: $selectedMultiBottomColors,
+                    onAddColor: {
+                        showMultiColorPicker = true
+                    }
+                )
+                Spacer()
+                
+                NavigationLink(destination: HomeScreen()) {
+                    Text("Save")
+                        .font(.system(size: 20))
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(Color.black)
+                        .cornerRadius(14)
                 }
-            )
-            // Multi Color Section
-            SectionTitle(text: "Multi Color")
-                .padding(.top, 35)
-                .foregroundStyle(.black)
-            MultiColorBlockGrid(
-                colors: multiBottomColors,
-                selectedIndices: $selectedMultiBottomColors,
-                onAddColor: {
-                    showMultiColorPicker = true
+                .padding(.horizontal, 16)
+                .padding(.bottom, 32)
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(Color.white.ignoresSafeArea())
+            .navigationBarBackButtonHidden(true)
+            .sheet(isPresented: $showSolidColorPicker) {
+                SolidColorPickerSheet(newColor: $newBottomColor) {
+                    solidBottomColors.append(newBottomColor)
+                    showSolidColorPicker = false
                 }
-            )
-            Spacer()
-            Button(action: {
-                // Action for continue
-            }) {
-                Text("Save")
-                    .font(.system(size: 20))
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color.black)
-                    .cornerRadius(14)
             }
-            .padding(.horizontal, 16)
-            .padding(.bottom, 32)
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color.white.ignoresSafeArea())
-        .navigationBarBackButtonHidden(true)
-        .sheet(isPresented: $showSolidColorPicker) {
-            SolidColorPickerSheet(newColor: $newBottomColor) {
-                solidBottomColors.append(newBottomColor)
-                showSolidColorPicker = false
-            }
-        }
-        .sheet(isPresented: $showMultiColorPicker) {
-            MultiColorPickerSheet(
-                newLeftColor: $newMultiBottomColor1,
-                newRightColor: $newMultiBottomColor2
-            ) {
-                multiBottomColors.append((newMultiBottomColor1, newMultiBottomColor2))
-                showMultiColorPicker = false
+            .sheet(isPresented: $showMultiColorPicker) {
+                MultiColorPickerSheet(
+                    newLeftColor: $newMultiBottomColor1,
+                    newRightColor: $newMultiBottomColor2
+                ) {
+                    multiBottomColors.append((newMultiBottomColor1, newMultiBottomColor2))
+                    showMultiColorPicker = false
+                }
             }
         }
     }

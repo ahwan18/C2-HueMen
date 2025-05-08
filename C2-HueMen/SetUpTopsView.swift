@@ -110,6 +110,7 @@ struct SelectTopColorsView: View {
                 }
             }
         }
+        .navigationBarHidden(true)
     }
 }
 

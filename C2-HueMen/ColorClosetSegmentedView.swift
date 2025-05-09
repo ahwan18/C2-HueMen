@@ -20,6 +20,7 @@ struct ColorClosetSegmentedView: View {
     @State private var multiBottomColors: [(Color, Color)] = [(.brown, .black)]
     @State private var selectedItem: ClosetSelection? = nil
     @State private var showRecommendation = false
+    @State private var navigateToHome = false
 
     // Helper untuk ekstrak data
     func getRecommendationParams() -> (color: Color, uploadType: UploadType, isMulti: Bool)? {
@@ -40,6 +41,11 @@ struct ColorClosetSegmentedView: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
+                Text("Select 1 Color from Your Wardrobe")
+                    .font(.title3)
+                    .fontWeight(.bold)
+                    .padding()
+                
                 // Segmented control
                 Picker("Section", selection: $selectedSection) {
                     ForEach(ClosetSection.allCases, id: \.self) {
@@ -80,8 +86,6 @@ struct ColorClosetSegmentedView: View {
                             .padding(.bottom, 30)
                         }
                         
-                        
-
                         // Multi
                         Text("Multi Color")
                             .font(.headline)
@@ -108,7 +112,7 @@ struct ColorClosetSegmentedView: View {
                                 }
                             )
                         }
-                        Spacer().frame(height: 215)
+                        Spacer().frame(height: 160)
                         // Continue Button
                         Button(action: {
                             showRecommendation = true
@@ -135,8 +139,26 @@ struct ColorClosetSegmentedView: View {
                     .padding()
                 }
             }
-            .navigationTitle("Select 1 Color from Your Wardrobe")
             .navigationBarTitleDisplayMode(.inline)
+            .navigationBarBackButtonHidden(true)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button(action: {
+                        navigateToHome = true
+                    }) {
+                        HStack(spacing: 4) {
+                            Image(systemName: "chevron.left")
+                                .font(.system(size: 17, weight: .semibold))
+                            Text("Back")
+                                .font(.system(size: 17))
+                        }
+                        .foregroundColor(.black)
+                    }
+                }
+            }
+            .navigationDestination(isPresented: $navigateToHome) {
+                HomeScreen()
+            }
         }
     }
 }

@@ -22,7 +22,7 @@ struct RecommendationView: View {
     let uploadType: UploadType
     
     // Sekarang, gunakan mode .top
-    var mode: Mode = .top
+//    var mode: Mode = .top
     
     @State private var topColor: Color = .brown
     @State private var bottomColor: Color = .teal
@@ -45,7 +45,7 @@ struct RecommendationView: View {
                 VStack(spacing: 24) {
                     // Header
                     VStack(spacing: 6) {
-                        Text(mode == .top ? SectionTitle.bottom.rawValue : SectionTitle.top.rawValue)
+                        Text(uploadType == .top ? SectionTitle.bottom.rawValue : SectionTitle.top.rawValue)
                             .foregroundStyle(.black)
                             .font(.title2)
                             .fontWeight(.bold)
@@ -79,7 +79,7 @@ struct RecommendationView: View {
                             .fontWeight(.semibold)
                             .foregroundStyle(.black)
                         HStack {
-                            if mode == .top {
+                            if uploadType == .top {
                                 ColorBlocks(color: bottomOptions.first ?? .clear, isSelected: selectedBottomIndex == 0)
                                     .onTapGesture {
                                         bottomColor = bottomOptions.first ?? .clear
@@ -96,7 +96,7 @@ struct RecommendationView: View {
                         Text("Compatible colors:")
                             .foregroundStyle(.black)
                         HStack(spacing: 16) {
-                            if mode == .top {
+                            if uploadType == .top {
                                 CompatibleBottomColorsView(
                                     bottomOptions: bottomOptions,
                                     selectedBottomIndex: $selectedBottomIndex,
@@ -132,6 +132,7 @@ struct RecommendationView: View {
                         EmptyView()
                     }
                 }
+                .navigationBarBackButtonHidden()
                 .padding(.top)
                 .onAppear {
                     // Set the initial color based on uploadType

@@ -2,6 +2,7 @@ import SwiftUI
 
 struct SelectTopColorsView: View {
     var onSetupComplete: (() -> Void)? = nil
+    @StateObject private var colorManager = ColorClosetManager.shared
     @State private var solidColors: [Color] = [
         .white, .black, .gray, Color(red: 0.0, green: 0.2, blue: 0.4), // navy
         Color(red: 0.7, green: 0.85, blue: 1.0), // light blue
@@ -80,6 +81,13 @@ struct SelectTopColorsView: View {
                 }
                 
                 Button(action: {
+                    // Save selected colors to ColorClosetManager
+                    colorManager.updateFromSetup(
+                        topSolidColors: Array(selectedColors),
+                        topMultiColors: selectedMultiColors.map { multiColors[$0] },
+                        bottomSolidColors: colorManager.solidBottomColors,
+                        bottomMultiColors: colorManager.multiBottomColors
+                    )
                     navigateToBottoms = true
                 }) {
                     Text("Continue")

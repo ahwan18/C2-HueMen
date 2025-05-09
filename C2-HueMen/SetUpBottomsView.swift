@@ -9,7 +9,7 @@ import SwiftUI
 
 struct SelectBottomColorsView: View {
     var onSetupComplete: (() -> Void)? = nil
-    @AppStorage("hasCompletedSetup") private var hasCompletedSetup: Bool = false
+    @StateObject private var colorManager = ColorClosetManager.shared
     @State private var solidBottomColors: [Color] = [
         .white, .black, .gray, Color(red: 0.0, green: 0.2, blue: 0.4), // navy
         Color(red: 0.7, green: 0.85, blue: 1.0), // light blue
@@ -75,7 +75,14 @@ struct SelectBottomColorsView: View {
                     EmptyView()
                 }
                 Button(action: {
-                    hasCompletedSetup = true
+                    // Save selected colors to ColorClosetManager
+                    colorManager.updateFromSetup(
+                        topSolidColors: colorManager.solidTopColors,
+                        topMultiColors: colorManager.multiTopColors,
+                        bottomSolidColors: Array(selectedBottomColors),
+                        bottomMultiColors: selectedMultiBottomColors.map { multiBottomColors[$0] }
+                    )
+                    UserDefaults.standard.set(true, forKey: "hasCompletedSetup")
                     onSetupComplete?()
                     navigateToHome = true
                 }) {

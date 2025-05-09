@@ -50,7 +50,6 @@ struct RecommendationView: View {
                             .font(.title2)
                             .fontWeight(.bold)
                             .frame(maxWidth: .infinity, alignment: .leading)
-                        Spacer().frame(height: 12)
                     }
                     .padding(.horizontal)
                     
@@ -128,6 +127,7 @@ struct RecommendationView: View {
                     .background(Color.black)
                     .cornerRadius(10)
                     .padding(.horizontal)
+                    
                     NavigationLink(destination: HomeScreen(), isActive: $isDoneActive) {
                         EmptyView()
                     }

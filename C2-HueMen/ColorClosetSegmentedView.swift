@@ -19,6 +19,23 @@ struct ColorClosetSegmentedView: View {
     @State private var solidBottomColors: [Color] = [.brown, .blue, .gray]
     @State private var multiBottomColors: [(Color, Color)] = [(.brown, .black)]
     @State private var selectedItem: ClosetSelection? = nil
+    @State private var showRecommendation = false
+
+    // Helper untuk ekstrak data
+    func getRecommendationParams() -> (color: Color, uploadType: UploadType, isMulti: Bool)? {
+        switch selectedItem {
+        case .solidTop(let color):
+            return (color, .top, false)
+        case .multiTop(let idx):
+            return (multiTopColors[idx].0, .top, true) // .0 atau .1 sesuai kebutuhan
+        case .solidBottom(let color):
+            return (color, .bottom, false)
+        case .multiBottom(let idx):
+            return (multiBottomColors[idx].0, .bottom, true) // .0 atau .1 sesuai kebutuhan
+        case .none:
+            return nil
+        }
+    }
 
     var body: some View {
         NavigationStack {
@@ -94,7 +111,7 @@ struct ColorClosetSegmentedView: View {
                         Spacer().frame(height: 215)
                         // Continue Button
                         Button(action: {
-                            // Action for continue
+                            showRecommendation = true
                         }) {
                             Text("Continue")
                                 .foregroundColor(.white)
@@ -102,6 +119,16 @@ struct ColorClosetSegmentedView: View {
                                 .padding()
                                 .background(Color.black)
                                 .cornerRadius(14)
+                        }
+                        .disabled(selectedItem == nil)
+                        // Navigation ke RecommendationView
+                        if let params = getRecommendationParams() {
+                            NavigationLink(
+                                destination: RecommendationView(selectedColor: params.color, uploadType: params.uploadType),
+                                isActive: $showRecommendation
+                            ) {
+                                EmptyView()
+                            }
                         }
                     }
                     .padding(.vertical)

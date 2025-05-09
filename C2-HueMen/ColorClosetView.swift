@@ -181,48 +181,45 @@ struct ClosetColorBlockGrid: View {
     @Binding var selectedColors: Set<Color>
     let columns = 4
     var onAddColor: (() -> Void)? = nil
-    var onSelect: (() -> Void)? = nil // NEW
+    var onSelect: (() -> Void)? = nil
+
+    private let gridItems = [
+        GridItem(.fixed(80), spacing: 10),
+        GridItem(.fixed(80), spacing: 10),
+        GridItem(.fixed(80), spacing: 10),
+        GridItem(.fixed(80), spacing: 10)
+    ]
 
     var body: some View {
-        VStack(spacing: 10) {
-            let total = colors.count + (onAddColor != nil ? 1 : 0)
-            ForEach(0..<rowsNeeded(for: total), id: \.self) { row in
-                HStack(spacing: 10) {
-                    ForEach(0..<columns, id: \.self) { col in
-                        let index = row * columns + col
-                        if index < colors.count {
-                            let color = colors[index]
-                            ClosetColorBlock(
-                                color: color,
-                                isSelected: selectedColors.contains(color),
-                                onDelete: {
-                                    colors.removeAll { $0 == color }
-                                    selectedColors.remove(color)
-                                }
-                            )
-                            .onTapGesture {
-                                if selectedColors.contains(color) {
-                                    selectedColors.removeAll()
-                                } else {
-                                    selectedColors = [color]
-                                    onSelect?() // clear multi
-                                }
-                            }
-                        } else if index == colors.count, let onAddColor = onAddColor {
-                            AddColorBlock(action: onAddColor)
-                        } else {
-                            Spacer()
-                        }
+        LazyVGrid(columns: gridItems, spacing: 10) {
+            ForEach(colors.indices, id: \.self) { index in
+                let color = colors[index]
+                ClosetColorBlock(
+                    color: color,
+                    isSelected: selectedColors.contains(color),
+                    onDelete: {
+                        colors.removeAll { $0 == color }
+                        selectedColors.remove(color)
+                    }
+                )
+                .frame(width: 80, height: 55)
+                .onTapGesture {
+                    if selectedColors.contains(color) {
+                        selectedColors.removeAll()
+                    } else {
+                        selectedColors = [color]
+                        onSelect?()
                     }
                 }
+            }
+            
+            if let onAddColor = onAddColor {
+                AddColorBlock(action: onAddColor)
+                    .frame(width: 80, height: 55)
             }
         }
         .padding(.horizontal, 24)
         .padding(.bottom, 25)
-    }
-
-    private func rowsNeeded(for count: Int) -> Int {
-        (count + columns - 1) / columns
     }
 }
 
@@ -235,7 +232,7 @@ struct ClosetColorBlock: View {
         ZStack {
             Rectangle()
                 .fill(color)
-                .frame(width: 80, height: 55)
+                .frame(width: 75, height: 55)
                 .cornerRadius(10)
                 .overlay(
                     RoundedRectangle(cornerRadius: 10)
@@ -273,57 +270,52 @@ struct ClosetColorBlock: View {
     }
 }
 
-
 struct ClosetMultiColorBlockGrid: View {
     @Binding var colors: [(Color, Color)]
     @Binding var selectedIndices: Set<Int>
     let columns = 4
     var onAddColor: (() -> Void)? = nil
-    var onSelect: (() -> Void)? = nil // NEW
+    var onSelect: (() -> Void)? = nil
+
+    private let gridItems = [
+        GridItem(.fixed(80), spacing: 10),
+        GridItem(.fixed(80), spacing: 10),
+        GridItem(.fixed(80), spacing: 10),
+        GridItem(.fixed(80), spacing: 10)
+    ]
 
     var body: some View {
-        VStack(spacing: 10) {
-            let total = colors.count + (onAddColor != nil ? 1 : 0)
-            ForEach(0..<rowsNeeded(for: total), id: \.self) { row in
-                HStack(spacing: 10) {
-                    ForEach(0..<columns, id: \.self) { col in
-                        let index = row * columns + col
-                        if index < colors.count {
-                            let colorPair = colors[index]
-                            ClosetMultiColorBlock(
-                                leftColor: colorPair.0,
-                                rightColor: colorPair.1,
-                                isSelected: selectedIndices.contains(index),
-                                onDelete: {
-                                    colors.remove(at: index)
-                                    selectedIndices.remove(index)
-                                }
-                            )
-                            .onTapGesture {
-                                if selectedIndices.contains(index) {
-                                    selectedIndices.removeAll()
-                                } else {
-                                    selectedIndices = [index]
-                                    onSelect?() // clear solid
-                                }
-                            }
-                        } else if index == colors.count, let onAddColor = onAddColor {
-                            AddColorBlock(action: onAddColor)
-                        } else {
-                            Spacer()
-                        }
+        LazyVGrid(columns: gridItems, spacing: 10) {
+            ForEach(colors.indices, id: \.self) { index in
+                let colorPair = colors[index]
+                ClosetMultiColorBlock(
+                    leftColor: colorPair.0,
+                    rightColor: colorPair.1,
+                    isSelected: selectedIndices.contains(index),
+                    onDelete: {
+                        colors.remove(at: index)
+                        selectedIndices.remove(index)
+                    }
+                )
+                .frame(width: 80, height: 55)
+                .onTapGesture {
+                    if selectedIndices.contains(index) {
+                        selectedIndices.removeAll()
+                    } else {
+                        selectedIndices = [index]
+                        onSelect?()
                     }
                 }
+            }
+            
+            if let onAddColor = onAddColor {
+                AddColorBlock(action: onAddColor)
+                    .frame(width: 80, height: 55)
             }
         }
         .padding(.horizontal, 24)
     }
-
-    private func rowsNeeded(for count: Int) -> Int {
-        (count + columns - 1) / columns
-    }
 }
-
 
 struct ClosetMultiColorBlock: View {
     let leftColor: Color
@@ -338,7 +330,7 @@ struct ClosetMultiColorBlock: View {
                 Rectangle().fill(leftColor)
                 Rectangle().fill(rightColor)
             }
-            .frame(width: 80, height: 55)
+            .frame(width: 75, height: 55)
             .cornerRadius(10)
             .overlay(
                 RoundedRectangle(cornerRadius: 10)
@@ -376,11 +368,6 @@ struct ClosetMultiColorBlock: View {
         }
     }
 }
-
-
-
-
-
 
 #Preview {
     ColorClosetView()

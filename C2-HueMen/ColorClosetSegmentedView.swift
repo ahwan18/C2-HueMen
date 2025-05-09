@@ -1,52 +1,26 @@
 import SwiftUI
 
-enum ClosetSection: String, CaseIterable {
-    case top = "Top"
-    case bottom = "Bottom"
-}
-
-enum ClosetSelection: Equatable {
-    case solidTop(Color)
-    case multiTop(Int)
-    case solidBottom(Color)
-    case multiBottom(Int)
-}
-
 struct ColorClosetSegmentedView: View {
-    @State private var selectedSection: ClosetSection = .top
-    @State private var solidTopColors: [Color] = [.white, .black, .gray, Color(red: 0.0, green: 0.2, blue: 0.4), Color(red: 0.7, green: 0.85, blue: 1.0), .brown]
-    @State private var multiTopColors: [(Color, Color)] = [(.white, .blue), (.gray, .black), (.blue, Color(red: 0.7, green: 0.85, blue: 1.0)), (.white, .gray)]
-    @State private var solidBottomColors: [Color] = [.brown, .blue, .gray]
-    @State private var multiBottomColors: [(Color, Color)] = [(.brown, .black)]
-    @State private var selectedItem: ClosetSelection? = nil
-    @State private var showRecommendation = false
-    @State private var navigateToHome = false
-
-    // Helper untuk ekstrak data
-    func getRecommendationParams() -> (color: Color, uploadType: UploadType, isMulti: Bool)? {
-        switch selectedItem {
-        case .solidTop(let color):
-            return (color, .top, false)
-        case .multiTop(let idx):
-            return (multiTopColors[idx].0, .top, true) // .0 atau .1 sesuai kebutuhan
-        case .solidBottom(let color):
-            return (color, .bottom, false)
-        case .multiBottom(let idx):
-            return (multiBottomColors[idx].0, .bottom, true) // .0 atau .1 sesuai kebutuhan
-        case .none:
-            return nil
-        }
+    enum ClosetSection: String, CaseIterable {
+        case top = "Top"
+        case bottom = "Bottom"
     }
-
+    
+    @StateObject private var colorManager = ColorClosetManager.shared
+    @State private var selectedSection: ClosetSection = .top
+    @State private var selectedItem: SelectedItem? = nil
+    @State private var showRecommendation = false
+    
+    enum SelectedItem {
+        case solidTop(Color)
+        case multiTop(Int)
+        case solidBottom(Color)
+        case multiBottom(Int)
+    }
+    
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-                Text("Select 1 Color from Your Wardrobe")
-                    .font(.title3)
-                    .fontWeight(.bold)
-                    .padding()
-                
-                // Segmented control
                 Picker("Section", selection: $selectedSection) {
                     ForEach(ClosetSection.allCases, id: \.self) {
                         Text($0.rawValue)
@@ -57,14 +31,13 @@ struct ColorClosetSegmentedView: View {
 
                 ScrollView {
                     VStack(alignment: .leading, spacing: 20) {
-                        // Solid
                         Text("Solid Color")
                             .font(.headline)
                             .padding(.horizontal)
 
                         if selectedSection == .top {
                             ColorBlockGridSingleSelect(
-                                colors: solidTopColors,
+                                colors: colorManager.solidTopColors,
                                 selectedColor: selectedItem.flatMap { sel in
                                     if case let .solidTop(color) = sel { return color } else { return nil }
                                 },
@@ -75,7 +48,7 @@ struct ColorClosetSegmentedView: View {
                             .padding(.bottom, 30)
                         } else {
                             ColorBlockGridSingleSelect(
-                                colors: solidBottomColors,
+                                colors: colorManager.solidBottomColors,
                                 selectedColor: selectedItem.flatMap { sel in
                                     if case let .solidBottom(color) = sel { return color } else { return nil }
                                 },
@@ -85,15 +58,14 @@ struct ColorClosetSegmentedView: View {
                             )
                             .padding(.bottom, 30)
                         }
-                        
-                        // Multi
+
                         Text("Multi Color")
                             .font(.headline)
                             .padding(.horizontal)
 
                         if selectedSection == .top {
                             MultiColorBlockGridSingleSelect(
-                                colors: multiTopColors,
+                                colors: colorManager.multiTopColors,
                                 selectedIndex: selectedItem.flatMap { sel in
                                     if case let .multiTop(idx) = sel { return idx } else { return nil }
                                 },
@@ -103,7 +75,7 @@ struct ColorClosetSegmentedView: View {
                             )
                         } else {
                             MultiColorBlockGridSingleSelect(
-                                colors: multiBottomColors,
+                                colors: colorManager.multiBottomColors,
                                 selectedIndex: selectedItem.flatMap { sel in
                                     if case let .multiBottom(idx) = sel { return idx } else { return nil }
                                 },
@@ -112,8 +84,8 @@ struct ColorClosetSegmentedView: View {
                                 }
                             )
                         }
-                        Spacer().frame(height: 160)
-                        // Continue Button
+                        Spacer().frame(height: 215)
+                        
                         Button(action: {
                             showRecommendation = true
                         }) {
@@ -125,7 +97,7 @@ struct ColorClosetSegmentedView: View {
                                 .cornerRadius(14)
                         }
                         .disabled(selectedItem == nil)
-                        // Navigation ke RecommendationView
+                        
                         if let params = getRecommendationParams() {
                             NavigationLink(
                                 destination: RecommendationView(selectedColor: params.color, uploadType: params.uploadType),
@@ -139,26 +111,25 @@ struct ColorClosetSegmentedView: View {
                     .padding()
                 }
             }
+            .navigationTitle("Select 1 Color from Your Wardrobe")
             .navigationBarTitleDisplayMode(.inline)
-            .navigationBarBackButtonHidden(true)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button(action: {
-                        navigateToHome = true
-                    }) {
-                        HStack(spacing: 4) {
-                            Image(systemName: "chevron.left")
-                                .font(.system(size: 17, weight: .semibold))
-                            Text("Back")
-                                .font(.system(size: 17))
-                        }
-                        .foregroundColor(.black)
-                    }
-                }
-            }
-            .navigationDestination(isPresented: $navigateToHome) {
-                HomeScreen()
-            }
+        }
+    }
+    
+    private func getRecommendationParams() -> (color: Color, uploadType: UploadType)? {
+        guard let selected = selectedItem else { return nil }
+        
+        switch selected {
+        case .solidTop(let color):
+            return (color, .top)
+        case .multiTop(let index):
+            guard index < colorManager.multiTopColors.count else { return nil }
+            return (colorManager.multiTopColors[index].0, .top)
+        case .solidBottom(let color):
+            return (color, .bottom)
+        case .multiBottom(let index):
+            guard index < colorManager.multiBottomColors.count else { return nil }
+            return (colorManager.multiBottomColors[index].0, .bottom)
         }
     }
 }

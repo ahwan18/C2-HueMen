@@ -1,21 +1,64 @@
 import SwiftUI
 
+class ColorClosetManager: ObservableObject {
+    @Published var solidTopColors: [Color] = [.red, .blue, .green, .yellow, .orange, .purple, .pink]
+    @Published var multiTopColors: [(Color, Color)] = [(.gray, .mint), (.cyan, .brown), (.indigo, .teal), (.black, .white)]
+    @Published var solidBottomColors: [Color] = [.red, .blue, .green, .yellow]
+    @Published var multiBottomColors: [(Color, Color)] = [(.mint, .gray), (.orange, .purple)]
+    
+    static let shared = ColorClosetManager()
+    
+    private init() {}
+    
+    func addSolidTopColor(_ color: Color) {
+        solidTopColors.append(color)
+    }
+    
+    func addMultiTopColor(_ colors: (Color, Color)) {
+        multiTopColors.append(colors)
+    }
+    
+    func addSolidBottomColor(_ color: Color) {
+        solidBottomColors.append(color)
+    }
+    
+    func addMultiBottomColor(_ colors: (Color, Color)) {
+        multiBottomColors.append(colors)
+    }
+    
+    func removeSolidTopColor(_ color: Color) {
+        solidTopColors.removeAll { $0 == color }
+    }
+    
+    func removeMultiTopColor(at index: Int) {
+        if index < multiTopColors.count {
+            multiTopColors.remove(at: index)
+        }
+    }
+    
+    func removeSolidBottomColor(_ color: Color) {
+        solidBottomColors.removeAll { $0 == color }
+    }
+    
+    func removeMultiBottomColor(at index: Int) {
+        if index < multiBottomColors.count {
+            multiBottomColors.remove(at: index)
+        }
+    }
+}
+
 struct ColorClosetView: View {
     enum ClosetSection: String, CaseIterable {
         case top = "Top"
         case bottom = "Bottom"
     }
 
+    @StateObject private var colorManager = ColorClosetManager.shared
     @State private var selectedSection: ClosetSection = .top
 
     // Color States
-    @State private var solidTopColors: [Color] = [.red, .blue, .green, .yellow, .orange, .purple, .pink]
-    @State private var multiTopColors: [(Color, Color)] = [(.gray, .mint), (.cyan, .brown), (.indigo, .teal), (.black, .white)]
     @State private var selectedTopColors: Set<Color> = []
     @State private var selectedTopMultiColors: Set<Int> = []
-
-    @State private var solidBottomColors: [Color] = [.red, .blue, .green, .yellow]
-    @State private var multiBottomColors: [(Color, Color)] = [(.mint, .gray), (.orange, .purple)]
     @State private var selectedBottomColors: Set<Color> = []
     @State private var selectedBottomMultiColors: Set<Int> = []
 
@@ -47,9 +90,9 @@ struct ColorClosetView: View {
                             closetSectionView(
                                 icon: Image(systemName: "tshirt.circle"),
                                 title: "Top Colors",
-                                solidColors: $solidTopColors,
+                                solidColors: $colorManager.solidTopColors,
                                 selectedColors: $selectedTopColors,
-                                multiColors: $multiTopColors,
+                                multiColors: $colorManager.multiTopColors,
                                 selectedMultiIndices: $selectedTopMultiColors,
                                 isTop: true
                             )
@@ -57,9 +100,9 @@ struct ColorClosetView: View {
                             closetSectionView(
                                 icon: Image(.bottom2),
                                 title: "Bottom Colors",
-                                solidColors: $solidBottomColors,
+                                solidColors: $colorManager.solidBottomColors,
                                 selectedColors: $selectedBottomColors,
-                                multiColors: $multiBottomColors,
+                                multiColors: $colorManager.multiBottomColors,
                                 selectedMultiIndices: $selectedBottomMultiColors,
                                 isTop: false
                             )
@@ -94,9 +137,9 @@ struct ColorClosetView: View {
             .sheet(isPresented: $showSolidColorPicker) {
                 SolidColorPickerSheet(newColor: $newColor) {
                     if isAddingToTop {
-                        solidTopColors.append(newColor)
+                        colorManager.addSolidTopColor(newColor)
                     } else {
-                        solidBottomColors.append(newColor)
+                        colorManager.addSolidBottomColor(newColor)
                     }
                     showSolidColorPicker = false
                 }
@@ -104,9 +147,9 @@ struct ColorClosetView: View {
             .sheet(isPresented: $showMultiColorPicker) {
                 MultiColorPickerSheet(newLeftColor: $newMultiColor1, newRightColor: $newMultiColor2) {
                     if isAddingToTop {
-                        multiTopColors.append((newMultiColor1, newMultiColor2))
+                        colorManager.addMultiTopColor((newMultiColor1, newMultiColor2))
                     } else {
-                        multiBottomColors.append((newMultiColor1, newMultiColor2))
+                        colorManager.addMultiBottomColor((newMultiColor1, newMultiColor2))
                     }
                     showMultiColorPicker = false
                 }

@@ -9,6 +9,7 @@ import SwiftUI
 
 struct SelectBottomColorsView: View {
     var onSetupComplete: (() -> Void)? = nil
+    @AppStorage("hasCompletedSetup") private var hasCompletedSetup: Bool = false
     @State private var solidBottomColors: [Color] = [
         .white, .black, .gray, Color(red: 0.0, green: 0.2, blue: 0.4), // navy
         Color(red: 0.7, green: 0.85, blue: 1.0), // light blue
@@ -74,7 +75,7 @@ struct SelectBottomColorsView: View {
                     EmptyView()
                 }
                 Button(action: {
-                    UserDefaults.standard.set(true, forKey: "hasCompletedSetup")
+                    hasCompletedSetup = true
                     onSetupComplete?()
                     navigateToHome = true
                 }) {

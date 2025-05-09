@@ -5,18 +5,20 @@ enum ClosetSection: String, CaseIterable {
     case bottom = "Bottom"
 }
 
+enum ClosetSelection: Equatable {
+    case solidTop(Color)
+    case multiTop(Int)
+    case solidBottom(Color)
+    case multiBottom(Int)
+}
+
 struct ColorClosetSegmentedView: View {
     @State private var selectedSection: ClosetSection = .top
-
     @State private var solidTopColors: [Color] = [.white, .black, .gray, Color(red: 0.0, green: 0.2, blue: 0.4), Color(red: 0.7, green: 0.85, blue: 1.0), .brown]
     @State private var multiTopColors: [(Color, Color)] = [(.white, .blue), (.gray, .black), (.blue, Color(red: 0.7, green: 0.85, blue: 1.0)), (.white, .gray)]
-    @State private var selectedTopColor: Color? = nil
-    @State private var selectedMultiTopIndex: Int? = nil
-
     @State private var solidBottomColors: [Color] = [.brown, .blue, .gray]
     @State private var multiBottomColors: [(Color, Color)] = [(.brown, .black)]
-    @State private var selectedBottomColor: Color? = nil
-    @State private var selectedMultiBottomIndex: Int? = nil
+    @State private var selectedItem: ClosetSelection? = nil
 
     var body: some View {
         NavigationStack {
@@ -37,37 +39,70 @@ struct ColorClosetSegmentedView: View {
                             .font(.headline)
                             .padding(.horizontal)
 
-                        ColorBlockGridSingleSelect(
-                            colors: selectedSection == .top ? solidTopColors : solidBottomColors,
-                            selectedColor: selectedSection == .top ? $selectedTopColor : $selectedBottomColor
-                        )
-                        .padding(.bottom, 30)
+                        if selectedSection == .top {
+                            ColorBlockGridSingleSelect(
+                                colors: solidTopColors,
+                                selectedColor: selectedItem.flatMap { sel in
+                                    if case let .solidTop(color) = sel { return color } else { return nil }
+                                },
+                                onSelect: { color in
+                                    selectedItem = .solidTop(color)
+                                }
+                            )
+                            .padding(.bottom, 30)
+                        } else {
+                            ColorBlockGridSingleSelect(
+                                colors: solidBottomColors,
+                                selectedColor: selectedItem.flatMap { sel in
+                                    if case let .solidBottom(color) = sel { return color } else { return nil }
+                                },
+                                onSelect: { color in
+                                    selectedItem = .solidBottom(color)
+                                }
+                            )
+                            .padding(.bottom, 30)
+                        }
+                        
+                        
 
                         // Multi
                         Text("Multi Color")
                             .font(.headline)
                             .padding(.horizontal)
 
-                        MultiColorBlockGridSingleSelect(
-                            colors: selectedSection == .top ? multiTopColors : multiBottomColors,
-                            selectedIndex: selectedSection == .top ? $selectedMultiTopIndex : $selectedMultiBottomIndex
-                        )
-                        
+                        if selectedSection == .top {
+                            MultiColorBlockGridSingleSelect(
+                                colors: multiTopColors,
+                                selectedIndex: selectedItem.flatMap { sel in
+                                    if case let .multiTop(idx) = sel { return idx } else { return nil }
+                                },
+                                onSelect: { idx in
+                                    selectedItem = .multiTop(idx)
+                                }
+                            )
+                        } else {
+                            MultiColorBlockGridSingleSelect(
+                                colors: multiBottomColors,
+                                selectedIndex: selectedItem.flatMap { sel in
+                                    if case let .multiBottom(idx) = sel { return idx } else { return nil }
+                                },
+                                onSelect: { idx in
+                                    selectedItem = .multiBottom(idx)
+                                }
+                            )
+                        }
                         Spacer().frame(height: 215)
-                                    
-                                    // Continue Button
-                                    Button(action: {
-                                        // Action for continue
-                                    }) {
-                                        Text("Continue")
-                                            .foregroundColor(.white)
-                                            .frame(maxWidth: .infinity)
-                                            .padding()
-                                            .background(Color.black)
-                                            .cornerRadius(14)
-                                    }
-                        
-                        
+                        // Continue Button
+                        Button(action: {
+                            // Action for continue
+                        }) {
+                            Text("Continue")
+                                .foregroundColor(.white)
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                                .background(Color.black)
+                                .cornerRadius(14)
+                        }
                     }
                     .padding(.vertical)
                     .padding()
@@ -81,7 +116,8 @@ struct ColorClosetSegmentedView: View {
 
 struct ColorBlockGridSingleSelect: View {
     let colors: [Color]
-    @Binding var selectedColor: Color?
+    let selectedColor: Color?
+    let onSelect: (Color) -> Void
 
     var body: some View {
         LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 16), count: 4), spacing: 16) {
@@ -98,7 +134,7 @@ struct ColorBlockGridSingleSelect: View {
                         .shadow(radius: 2)
                 }
                 .onTapGesture {
-                    selectedColor = (selectedColor == color) ? nil : color
+                    onSelect(color)
                 }
             }
         }
@@ -108,7 +144,8 @@ struct ColorBlockGridSingleSelect: View {
 
 struct MultiColorBlockGridSingleSelect: View {
     let colors: [(Color, Color)]
-    @Binding var selectedIndex: Int?
+    let selectedIndex: Int?
+    let onSelect: (Int) -> Void
 
     var body: some View {
         LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 16), count: 4), spacing: 16) {
@@ -128,7 +165,7 @@ struct MultiColorBlockGridSingleSelect: View {
                     .shadow(radius: 2)
                 }
                 .onTapGesture {
-                    selectedIndex = (selectedIndex == index) ? nil : index
+                    onSelect(index)
                 }
             }
         }

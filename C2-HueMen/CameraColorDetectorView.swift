@@ -14,10 +14,9 @@ struct CameraColorDetectorView: View {
             CameraPreview(session: viewModel.session)
                 .ignoresSafeArea()
             
-            // Kotak deteksi di tengah layar
-            //            Rectangle()
-            //                .stroke(Color.white, lineWidth: 2)
-            //                .frame(width: 10, height: 10)
+            Rectangle()
+                .stroke(Color.white, lineWidth: 2)
+                .frame(width: 10, height: 10)
             
             VStack(spacing: 0) {
                 HStack {
@@ -28,27 +27,48 @@ struct CameraColorDetectorView: View {
                             .foregroundColor(.white)
                             .font(.system(size: 18, weight: .medium))
                     }
+                    
                     Spacer()
+                    
                     Text("Capture Cloth Color")
                         .foregroundColor(.white)
                         .font(.headline)
+                    
                     Spacer()
-                    Spacer().frame(width: 24) // for symmetry
+                    
+                    Spacer().frame(width: 24)
                 }
                 .padding()
                 .background(Color.black)
                 
+                if let label = viewModel.detectedColorLabel {
+                    Text(label)
+                        .font(.title2.bold())
+                        .foregroundColor(.white)
+                        .padding(.vertical, 8)
+                        .padding(.horizontal, 18)
+                        .background(.ultraThinMaterial)
+                        .background(Color.black.opacity(0.4))
+                        .cornerRadius(10)
+                        .padding(.top, 24)
+                }
+                
+//                let label = "Red"
+//                    Text(label)
+//                        .font(.title2.bold())
+//                        .foregroundColor(.white)
+//                        .padding(.vertical, 8)
+//                        .padding(.horizontal, 18)
+//                        .background(.ultraThinMaterial)
+//                        .cornerRadius(10)
+//                        .padding(.top, 24)
+                
                 Spacer()
                 
-                Rectangle()
-                    .stroke(Color.white, lineWidth: 2)
-                    .frame(width: 10, height: 10)
-                
-                Spacer()
                 
                 VStack(spacing: 4) {
                     Label("Ensure good lighting", systemImage: "lightbulb")
-                    Label("Point camera at the cloth color", systemImage: "scope")
+                    Label("Point the small square at the cloth color", systemImage: "scope")
                 }
                 .font(.footnote)
                 .foregroundColor(.white.opacity(0.7))
@@ -58,17 +78,6 @@ struct CameraColorDetectorView: View {
                 .padding(.bottom, 12)
                 .fontWeight(.bold)
                 .preferredColorScheme(.dark)
-                
-                if let label = viewModel.detectedColorLabel {
-                    Text(label)
-                        .font(.title2.bold())
-                        .foregroundColor(.white)
-                        .padding(.vertical, 8)
-                        .padding(.horizontal, 16)
-                        .background(.ultraThinMaterial)
-                        .cornerRadius(10)
-                        .padding(.bottom, 8)
-                }
                 
                 VStack {
                     Button(action: {
@@ -113,58 +122,12 @@ struct CameraColorDetectorView: View {
         }
         .fullScreenCover(isPresented: $showColorSuggestion) {
             if let color = capturedColor {
-//                RecommendationView(selectedColor: color, uploadType: uploadType, path: .constant(NavigationPath()))
+                RecommendationView(selectedColor: color, uploadType: uploadType)
             }
         }
     }
 }
 
-// Agar UIImage bisa digunakan sebagai Identifiable untuk .fullScreenCover
-//extension UIImage: Identifiable {
-//    public var id: String { self.pngData()?.base64EncodedString() ?? UUID().uuidString }
-//}
-
-// RGB feedback
-//            VStack {
-//                Spacer()
-//                if let color = viewModel.detectedColor {
-//                    Text("R: \(color.r) G: \(color.g) B: \(color.b)")
-//                        .padding()
-//                        .background(Color.black.opacity(0.5))
-//                        .cornerRadius(8)
-//                        .foregroundColor(.white)
-//                }
-//                if let label = viewModel.detectedColorLabel {
-//                    Text("\(label)")
-//                        .padding(6)
-//                        .background(Color.black.opacity(0.5))
-//                        .cornerRadius(8)
-//                        .foregroundColor(.white)
-//                }
-//                Button(action: {
-//                    viewModel.isFlashOn.toggle()
-//                    viewModel.toggleFlash(on: viewModel.isFlashOn)
-//                }) {
-//                    Image(systemName: viewModel.isFlashOn ? "flashlight.on.fill" : "flashlight.off.fill")
-//                        .font(.system(size: 24))
-//                        .foregroundColor(.white)
-//                        .padding()
-//                        .background(Color.black.opacity(0.6))
-//                        .clipShape(Circle())
-//                }
-//                .padding()
-//                .position(x: UIScreen.main.bounds.width - 50, y: 60)
-
-// Tombol Capture
-//                Button(action: {
-//                    viewModel.capturePhoto()
-//                }) {
-//                    Image(systemName: "camera.circle.fill")
-//                        .resizable()
-//                        .frame(width: 64, height: 64)
-//                        .foregroundColor(.white)
-//                        .background(Color.black.opacity(0.4))
-//                        .clipShape(Circle())
-//                        .padding(.top, 16)
-//                }
-//}
+#Preview {
+    CameraColorDetectorView(uploadType: .top)
+}

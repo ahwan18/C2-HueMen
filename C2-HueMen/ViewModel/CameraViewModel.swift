@@ -166,9 +166,9 @@ class CameraViewModel: NSObject, ObservableObject, AVCaptureVideoDataOutputSampl
                        from connection: AVCaptureConnection) {
         guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { return }
         
-        // Update warna setiap 0.5 detik
+        // Update warna setiap 0.2 detik
         let now = Date()
-        guard now.timeIntervalSince(lastUpdate) > 0.5 || isCapturing else { return }
+        guard now.timeIntervalSince(lastUpdate) > 0.2 || isCapturing else { return }
         lastUpdate = now
         
         let ciImage = CIImage(cvPixelBuffer: pixelBuffer)

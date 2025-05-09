@@ -41,7 +41,7 @@ struct HomeScreen: View {
                 }) {
                     Text("Take a photo")
                         .foregroundColor(.white)
-                        .frame(maxWidth: 198, maxHeight: 10)
+                        .frame(maxWidth: 198, maxHeight: 15)
                         .padding()
                         .background(Color.black)
                         .cornerRadius(10)
@@ -81,7 +81,7 @@ struct HomeScreen: View {
                 }) {
                     Text("Pick from wardrobe")
                         .foregroundColor(.white)
-                        .frame(maxWidth: 198, maxHeight: 10)
+                        .frame(maxWidth: 198, maxHeight: 15)
                         .padding()
                         .background(.description)
                         .cornerRadius(10)

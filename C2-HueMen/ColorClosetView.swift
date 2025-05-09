@@ -37,6 +37,7 @@ struct ColorClosetView: View {
                         Text($0.rawValue)
                     }
                 }
+                .padding(.horizontal, 40)
                 .pickerStyle(.segmented)
                 .padding()
 

@@ -84,11 +84,12 @@ struct SelectTopColorsView: View {
                 }) {
                     Text("Continue")
                         .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
+                        .frame(maxWidth: .infinity, maxHeight: 15)
                         .padding()
-                        .background(Color.black)
-                        .cornerRadius(14)
+                        .background((selectedColors.isEmpty && selectedMultiColors.isEmpty) ? Color.gray.opacity(0.3) : Color.black)
+                        .cornerRadius(10)
                 }
+                .disabled(selectedColors.isEmpty && selectedMultiColors.isEmpty)
                 .padding(.horizontal, 16)
                 .padding(.bottom, 32)
             }
@@ -137,41 +138,38 @@ struct ColorBlockGrid: View {
     var onAddColor: (() -> Void)? = nil
 
     var body: some View {
-        VStack(spacing: 10) {
-            let total = colors.count + (onAddColor != nil ? 1 : 0)
-            ForEach(0..<rowsNeeded(for: total), id: \.self) { row in
-                HStack(spacing: 10) {
-                    ForEach(0..<columns, id: \.self) { col in
-                        let index = row * columns + col
-                        if index < colors.count {
-                            let color = colors[index]
-                            ColorBlock(
-                                color: color,
-                                isSelected: selectedColors.contains(color)
-                            )
-                            .onTapGesture {
-                                if selectedColors.contains(color) {
-                                    selectedColors.remove(color)
-                                } else {
-                                    selectedColors.insert(color)
-                                }
-                            }
-                        } else if index == colors.count, let onAddColor = onAddColor {
-                            AddColorBlock(action: onAddColor)
+        let total = colors.count + (onAddColor != nil ? 1 : 0)
+        let items: [AnyView] = (0..<total).map { index in
+            if index < colors.count {
+                let color = colors[index]
+                return AnyView(
+                    ColorBlock(
+                        color: color,
+                        isSelected: selectedColors.contains(color)
+                    )
+                    .onTapGesture {
+                        if selectedColors.contains(color) {
+                            selectedColors.remove(color)
                         } else {
-                            Spacer()
+                            selectedColors.insert(color)
                         }
                     }
-                }
+                )
+            } else if index == colors.count, let onAddColor = onAddColor {
+                return AnyView(AddColorBlock(action: onAddColor))
+            } else {
+                return AnyView(Spacer())
+            }
+        }
+        let gridItems = Array(repeating: GridItem(.flexible(), spacing: 10), count: columns)
+        LazyVGrid(columns: gridItems, spacing: 15) {
+            ForEach(0..<items.count, id: \.self) { index in
+                items[index]
             }
         }
         .padding(.horizontal, 24)
         .padding(.top, 0)
         .padding(.bottom, 25)
-    }
-
-    private func rowsNeeded(for count: Int) -> Int {
-        (count + columns - 1) / columns
     }
 }
 
@@ -183,7 +181,7 @@ struct ColorBlock: View {
         ZStack {
             Rectangle()
                 .fill(color)
-                .frame(width: 80, height: 55)
+                .frame(width: 75, height: 55)
                 .cornerRadius(10)
                 .overlay(
                     RoundedRectangle(cornerRadius: 10)
@@ -207,16 +205,17 @@ struct AddColorBlock: View {
         Button(action: action) {
             ZStack {
                 Rectangle()
-                    .fill(Color.gray.opacity(0.2))
-                    .frame(width: 80, height: 55)
+                    .fill(.lightGrayPlusButton)
+                    .frame(width: 75, height: 55)
                     .cornerRadius(10)
                     .overlay(
                         RoundedRectangle(cornerRadius: 10)
-                            .stroke(Color.gray.opacity(0.5), style: StrokeStyle(lineWidth: 1, dash: [5]))
+                            .stroke(Color.black.opacity(0.5))
                     )
+                    .shadow(color: Color.black.opacity(0.25), radius: 4, x: 0, y: 4)
                 Image(systemName: "plus")
-                    .font(.system(size: 28, weight: .bold))
-                    .foregroundColor(.gray)
+                    .font(.system(size: 22, weight: .bold))
+                    .foregroundColor(.black)
             }
         }
     }
@@ -229,40 +228,38 @@ struct MultiColorBlockGrid: View {
     var onAddColor: (() -> Void)? = nil
     
     var body: some View {
-        VStack(spacing: 10) {
-            let total = colors.count + (onAddColor != nil ? 1 : 0)
-            ForEach(0..<rowsNeeded(for: total), id: \.self) { row in                HStack(spacing: 10) {
-                ForEach(0..<columns) { col in
-                        let index = row * columns + col
-                        if index < colors.count {
-                            let colorPair = colors[index]
-                            MultiColorBlock(
-                                leftColor: colorPair.0,
-                                rightColor: colorPair.1,
-                                isSelected: selectedIndices.contains(index)
-                            )
-                            .onTapGesture {
-                                if selectedIndices.contains(index) {
-                                    selectedIndices.remove(index)
-                                } else {
-                                    selectedIndices.insert(index)
-                                }
-                            }
-                        } else if index == colors.count, let onAddColor = onAddColor {
-                            AddColorBlock(action: onAddColor)
+        let total = colors.count + (onAddColor != nil ? 1 : 0)
+        let items: [AnyView] = (0..<total).map { index in
+            if index < colors.count {
+                let colorPair = colors[index]
+                return AnyView(
+                    MultiColorBlock(
+                        leftColor: colorPair.0,
+                        rightColor: colorPair.1,
+                        isSelected: selectedIndices.contains(index)
+                    )
+                    .onTapGesture {
+                        if selectedIndices.contains(index) {
+                            selectedIndices.remove(index)
                         } else {
-                            Spacer()
+                            selectedIndices.insert(index)
                         }
                     }
-                }
+                )
+            } else if index == colors.count, let onAddColor = onAddColor {
+                return AnyView(AddColorBlock(action: onAddColor))
+            } else {
+                return AnyView(Spacer())
+            }
+        }
+        let gridItems = Array(repeating: GridItem(.flexible(), spacing: 10), count: columns)
+        LazyVGrid(columns: gridItems, spacing: 15) {
+            ForEach(0..<items.count, id: \.self) { index in
+                items[index]
             }
         }
         .padding(.horizontal, 24)
         .padding(.top, 0)
-    }
-
-    private func rowsNeeded(for count: Int) -> Int {
-        (count + columns - 1) / columns
     }
 }
 
@@ -279,7 +276,7 @@ struct MultiColorBlock: View {
                 Rectangle()
                     .fill(rightColor)
             }
-            .frame(width: 80, height: 55)
+            .frame(width: 75, height: 55)
             .cornerRadius(10)
             .overlay(
                 RoundedRectangle(cornerRadius: 10)

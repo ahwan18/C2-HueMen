@@ -81,11 +81,12 @@ struct SelectBottomColorsView: View {
                     Text("Save")
                         .font(.system(size: 20))
                         .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
+                        .frame(maxWidth: .infinity, maxHeight: 15)
                         .padding()
-                        .background(Color.black)
-                        .cornerRadius(14)
+                        .background((selectedBottomColors.isEmpty && selectedMultiBottomColors.isEmpty) ? Color.gray.opacity(0.3) : Color.black)
+                        .cornerRadius(10)
                 }
+                .disabled(selectedBottomColors.isEmpty && selectedMultiBottomColors.isEmpty)
                 .padding(.horizontal, 16)
                 .padding(.bottom, 32)
             }

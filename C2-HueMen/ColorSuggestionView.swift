@@ -21,9 +21,9 @@ struct RecommendationView: View {
     let uploadType: UploadType
     
     @StateObject private var colorManager = ColorClosetManager.shared
-    @State private var compatibleColors: [Color] = []
-    @State private var mostCompatibleColor: Color?
-    @State private var selectedCompatibleColor: Color?
+    @State private var compatibleColors: [ColorItem] = []
+    @State private var mostCompatibleColor: ColorItem?
+    @State private var selectedCompatibleColor: ColorItem?
     @State private var isDoneActive = false
     
     // Developer dapat mengubah nilai default di sini:
@@ -56,10 +56,10 @@ struct RecommendationView: View {
                                 .resizable()
                                 .aspectRatio(contentMode: .fit)
                                 .frame(width: 125, height: 120)
-                                .foregroundColor(uploadType == .top ? selectedColor : (selectedCompatibleColor ?? selectedColor))
+                                .foregroundColor(uploadType == .top ? selectedColor : (selectedCompatibleColor?.color ?? selectedColor))
                                 .padding(.bottom, 0)
                             PantsShape(leftWidthRatio: leftWidthRatio, rightWidthRatio: rightWidthRatio)
-                                .fill(uploadType == .top ? (selectedCompatibleColor ?? selectedColor) : selectedColor)
+                                .fill(uploadType == .top ? (selectedCompatibleColor?.color ?? selectedColor) : selectedColor)
                                 .frame(width: 70, height: 145)
                         }
                     }
@@ -70,31 +70,34 @@ struct RecommendationView: View {
                         Text("Most compatible:")
                             .fontWeight(.semibold)
                             .foregroundStyle(.black)
-                        HStack {
+                        HStack(alignment: .center, spacing: 16) {
                             if let mostCompatible = mostCompatibleColor {
-                                ColorBlocks(color: mostCompatible, isSelected: selectedCompatibleColor == mostCompatible)
+                                ColorBlocks(color: mostCompatible.color, isSelected: selectedCompatibleColor?.id == mostCompatible.id)
                                     .onTapGesture {
                                         selectedCompatibleColor = mostCompatible
                                     }
                             }
+                            Spacer()
                         }
                         
                         if !compatibleColors.isEmpty {
                             Text("Other compatible colors:")
                                 .foregroundStyle(.black)
-                            HStack(spacing: 16) {
-                                ForEach(compatibleColors, id: \.self) { color in
-                                    if color != mostCompatibleColor {
-                                        ColorBlocks(color: color, isSelected: selectedCompatibleColor == color)
+                            HStack(alignment: .center, spacing: 16) {
+                                ForEach(compatibleColors) { colorItem in
+                                    if colorItem.id != mostCompatibleColor?.id {
+                                        ColorBlocks(color: colorItem.color, isSelected: selectedCompatibleColor?.id == colorItem.id)
                                             .onTapGesture {
-                                                selectedCompatibleColor = color
+                                                selectedCompatibleColor = colorItem
                                             }
                                     }
                                 }
+                                Spacer()
                             }
                         }
                     }
                     .padding()
+                    .frame(maxWidth: .infinity)
                     .background(Color(.backgroundRecommendation))
                     .cornerRadius(16)
                     .shadow(radius: 2)
@@ -128,10 +131,17 @@ struct RecommendationView: View {
         let wardrobe = uploadType == .top ? colorManager.solidBottomColors : colorManager.solidTopColors
         
         // Get compatible colors using color theory
-        compatibleColors = ColorTheoryManager.shared.getCompatibleColors(from: wardrobe, for: selectedColor)
+        let allCompatibleColors = ColorTheoryManager.shared.getCompatibleColors(from: wardrobe, for: selectedColor)
         
         // Get most compatible color
-        mostCompatibleColor = ColorTheoryManager.shared.getMostCompatibleColor(from: wardrobe, for: selectedColor)
+        let mostCompatible = ColorTheoryManager.shared.getMostCompatibleColor(from: wardrobe, for: selectedColor)
+        mostCompatibleColor = mostCompatible.map { ColorItem(color: $0) }
+        
+        // Limit compatible colors to 4, excluding the most compatible color
+        compatibleColors = allCompatibleColors
+            .filter { $0 != mostCompatible }
+            .prefix(4)
+            .map { ColorItem(color: $0) }
         
         // Set initial selected compatible color
         selectedCompatibleColor = mostCompatibleColor
@@ -184,6 +194,19 @@ struct RecommendationView: View {
             path.closeSubpath()
             
             return path
+        }
+    }
+    
+    struct ColorItem: Identifiable, Hashable {
+        let id = UUID()
+        let color: Color
+        
+        func hash(into hasher: inout Hasher) {
+            hasher.combine(id)
+        }
+        
+        static func == (lhs: ColorItem, rhs: ColorItem) -> Bool {
+            lhs.id == rhs.id
         }
     }
 }

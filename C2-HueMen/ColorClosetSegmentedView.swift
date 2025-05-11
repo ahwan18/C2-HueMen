@@ -185,11 +185,43 @@ struct ColorClosetSegmentedView: View {
     @State private var newMultiColor1: Color = .gray
     @State private var newMultiColor2: Color = .blue
     
+    // Add alert state
+    @State private var showDuplicateAlert = false
+    @State private var alertMessage = ""
+    
     enum SelectedItem {
         case solidTop(Color)
         case multiTop(Int)
         case solidBottom(Color)
         case multiBottom(Int)
+    }
+    
+    // Add function to check for duplicate colors
+    private func isDuplicateSolidColor(_ color: Color) -> Bool {
+        let colors = selectedSection == .top ? colorManager.solidTopColors : colorManager.solidBottomColors
+        return colors.contains { existingColor in
+            let components1 = UIColor(existingColor).cgColor.components ?? []
+            let components2 = UIColor(color).cgColor.components ?? []
+            return components1.count == components2.count &&
+                   zip(components1, components2).allSatisfy { abs($0 - $1) < 0.01 }
+        }
+    }
+    
+    private func isDuplicateMultiColor(_ colors: (Color, Color)) -> Bool {
+        let multiColors = selectedSection == .top ? colorManager.multiTopColors : colorManager.multiBottomColors
+        return multiColors.contains { existingPair in
+            let components1_1 = UIColor(existingPair.0).cgColor.components ?? []
+            let components1_2 = UIColor(existingPair.1).cgColor.components ?? []
+            let components2_1 = UIColor(colors.0).cgColor.components ?? []
+            let components2_2 = UIColor(colors.1).cgColor.components ?? []
+            
+            let firstColorMatch = components1_1.count == components2_1.count &&
+                                zip(components1_1, components2_1).allSatisfy { abs($0 - $1) < 0.01 }
+            let secondColorMatch = components1_2.count == components2_2.count &&
+                                 zip(components1_2, components2_2).allSatisfy { abs($0 - $1) < 0.01 }
+            
+            return firstColorMatch && secondColorMatch
+        }
     }
     
     var body: some View {
@@ -329,27 +361,42 @@ struct ColorClosetSegmentedView: View {
             .navigationBarTitleDisplayMode(.inline)
             .sheet(isPresented: $showSolidColorPicker) {
                 SolidColorPickerSheet(newColor: $newColor) {
-                    if selectedSection == .top {
-                        colorManager.addSolidTopColor(newColor)
-                        selectedItem = .solidTop(newColor)
+                    if isDuplicateSolidColor(newColor) {
+                        alertMessage = "This color already exists in your wardrobe"
+                        showDuplicateAlert = true
                     } else {
-                        colorManager.addSolidBottomColor(newColor)
-                        selectedItem = .solidBottom(newColor)
+                        if selectedSection == .top {
+                            colorManager.addSolidTopColor(newColor)
+                            selectedItem = .solidTop(newColor)
+                        } else {
+                            colorManager.addSolidBottomColor(newColor)
+                            selectedItem = .solidBottom(newColor)
+                        }
+                        showSolidColorPicker = false
                     }
-                    showSolidColorPicker = false
                 }
             }
             .sheet(isPresented: $showMultiColorPicker) {
                 MultiColorPickerSheet(newLeftColor: $newMultiColor1, newRightColor: $newMultiColor2) {
-                    if selectedSection == .top {
-                        colorManager.addMultiTopColor((newMultiColor1, newMultiColor2))
-                        selectedItem = .multiTop(colorManager.multiTopColors.count - 1)
+                    if isDuplicateMultiColor((newMultiColor1, newMultiColor2)) {
+                        alertMessage = "This color combination already exists in your wardrobe"
+                        showDuplicateAlert = true
                     } else {
-                        colorManager.addMultiBottomColor((newMultiColor1, newMultiColor2))
-                        selectedItem = .multiBottom(colorManager.multiBottomColors.count - 1)
+                        if selectedSection == .top {
+                            colorManager.addMultiTopColor((newMultiColor1, newMultiColor2))
+                            selectedItem = .multiTop(colorManager.multiTopColors.count - 1)
+                        } else {
+                            colorManager.addMultiBottomColor((newMultiColor1, newMultiColor2))
+                            selectedItem = .multiBottom(colorManager.multiBottomColors.count - 1)
+                        }
+                        showMultiColorPicker = false
                     }
-                    showMultiColorPicker = false
                 }
+            }
+            .alert("Duplicate Color", isPresented: $showDuplicateAlert) {
+                Button("OK", role: .cancel) { }
+            } message: {
+                Text(alertMessage)
             }
         }
     }

@@ -32,6 +32,26 @@ struct RecommendationView: View {
     @State private var showAddToWardrobeAlert = false
     @State private var alertMessage = ""
     
+    private func isColorInWardrobe(_ color: Color) -> Bool {
+        let wardrobe = uploadType == .top ? colorManager.solidTopColors : colorManager.solidBottomColors
+        return wardrobe.contains { existingColor in
+            let components1 = UIColor(existingColor).cgColor.components ?? []
+            let components2 = UIColor(color).cgColor.components ?? []
+            return components1.count == components2.count &&
+                   zip(components1, components2).allSatisfy { abs($0 - $1) < 0.01 }
+        }
+    }
+    
+    private func addColorToWardrobe(_ color: Color) {
+        if uploadType == .top {
+            colorManager.addSolidTopColor(color)
+        } else {
+            colorManager.addSolidBottomColor(color)
+        }
+        alertMessage = "Color has been added to your wardrobe"
+        showAddToWardrobeAlert = true
+    }
+    
     var body: some View {
         NavigationStack {
             ZStack {
@@ -104,7 +124,6 @@ struct RecommendationView: View {
                                         .onTapGesture {
                                             selectedCompatibleColor = mostCompatible
                                         }
-                                    }
                                 }
                                 Spacer()
                             }
@@ -157,7 +176,7 @@ struct RecommendationView: View {
                 }
             }
         }
-        .alert("Added to Wardrobe", isPresented: $showAddToWardrobeAlert) {
+        .alert("Add to Wardrobe", isPresented: $showAddToWardrobeAlert) {
             Button("OK", role: .cancel) { }
         } message: {
             Text(alertMessage)
@@ -187,26 +206,6 @@ struct RecommendationView: View {
         print("Wardrobe colors: \(wardrobe)")
         print("Compatible colors: \(compatibleColors)")
         print("Most compatible: \(String(describing: mostCompatibleColor))")
-    }
-    
-    private func isColorInWardrobe(_ color: Color) -> Bool {
-        let wardrobe = uploadType == .top ? colorManager.solidTopColors : colorManager.solidBottomColors
-        return wardrobe.contains { existingColor in
-            let components1 = UIColor(existingColor).cgColor.components ?? []
-            let components2 = UIColor(color).cgColor.components ?? []
-            return components1.count == components2.count &&
-                   zip(components1, components2).allSatisfy { abs($0 - $1) < 0.01 }
-        }
-    }
-    
-    private func addColorToWardrobe(_ color: Color) {
-        if uploadType == .top {
-            colorManager.addSolidTopColor(color)
-        } else {
-            colorManager.addSolidBottomColor(color)
-        }
-        alertMessage = "Color has been added to your wardrobe"
-        showAddToWardrobeAlert = true
     }
     
     struct ColorBlocks: View {

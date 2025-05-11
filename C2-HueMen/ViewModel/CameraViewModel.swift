@@ -192,6 +192,7 @@ class CameraViewModel: NSObject, ObservableObject, AVCaptureVideoDataOutputSampl
                         self.detectedColorLabel = label
                         print("Detected Color Label: \(label)")
                         print(color)
+                        print("hue: ", hsb.hue, " saturation: ", hsb.saturation, " brightness: ", hsb.brightness)
                     }
                 }
             }
@@ -203,20 +204,6 @@ class CameraViewModel: NSObject, ObservableObject, AVCaptureVideoDataOutputSampl
                     self.isCapturing = false
                 }
             }
-        }
-    }
-    
-    func toggleFlash(on: Bool) {
-        guard let device = AVCaptureDevice.default(for: .video),
-              device.hasTorch else { return }
-        
-        do {
-            try device.lockForConfiguration()
-            device.torchMode = on ? .on : .off
-            try device.setTorchModeOn(level: 1.0)
-            device.unlockForConfiguration()
-        } catch {
-            print("Torch could not be used: \(error)")
         }
     }
     

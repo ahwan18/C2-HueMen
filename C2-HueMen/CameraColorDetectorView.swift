@@ -120,6 +120,9 @@ struct CameraColorDetectorView: View {
         .onAppear {
             viewModel.configure()
         }
+        .onDisappear {
+            viewModel.session.stopRunning()
+        }
         .fullScreenCover(isPresented: $showColorSuggestion) {
             if let color = capturedColor {
                 RecommendationView(selectedColor: color, uploadType: uploadType)

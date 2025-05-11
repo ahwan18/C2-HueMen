@@ -86,6 +86,7 @@ struct CameraColorDetectorView: View {
                         }
 
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                            viewModel.session.stopRunning()
                             isCapturing = false
                         }
 

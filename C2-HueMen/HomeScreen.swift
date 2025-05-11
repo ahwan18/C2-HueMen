@@ -94,20 +94,20 @@ struct HomeScreen: View {
                 
                 Spacer()
             }
-            .navigationBarItems(trailing:
-                                    Button(action: {
-                navigateToColorCloset = true
-            }) {
-                Image(systemName: "cabinet.fill")
-                    .foregroundStyle(.black)
-                    .padding(10)
-                    .background(Color.gray.opacity(0.2))
-                    .clipShape(Circle())
-            }
-            )
-            .navigationDestination(isPresented: $navigateToColorCloset) {
-                ColorClosetView()
-                }
+//            .navigationBarItems(trailing:
+//                                    Button(action: {
+//                navigateToColorCloset = true
+//            }) {
+//                Image(systemName: "cabinet.fill")
+//                    .foregroundStyle(.black)
+//                    .padding(10)
+//                    .background(Color.gray.opacity(0.2))
+//                    .clipShape(Circle())
+//            }
+//            )
+//            .navigationDestination(isPresented: $navigateToColorCloset) {
+//                ColorClosetView()
+//                }
             
             .background(
                 ZStack {

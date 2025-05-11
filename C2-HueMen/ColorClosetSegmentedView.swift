@@ -1,5 +1,172 @@
 import SwiftUI
 
+class ColorClosetManager: ObservableObject {
+    @Published var solidTopColors: [Color] = []
+    @Published var multiTopColors: [(Color, Color)] = []
+    @Published var solidBottomColors: [Color] = []
+    @Published var multiBottomColors: [(Color, Color)] = []
+    
+    static let shared = ColorClosetManager()
+    
+    private init() {
+        loadColors()
+    }
+    
+    private func loadColors() {
+        // Load solid top colors
+        if let topColorsData = UserDefaults.standard.array(forKey: "solidTopColors") as? [[CGFloat]] {
+            solidTopColors = topColorsData.compactMap { components in
+                guard components.count == 4 else { return nil }
+                return Color(.sRGB, red: components[0], green: components[1], blue: components[2], opacity: components[3])
+            }
+        }
+        
+        // Load multi top colors
+        if let multiTopColorsData = UserDefaults.standard.array(forKey: "multiTopColors") as? [[[CGFloat]]] {
+            multiTopColors = multiTopColorsData.compactMap { pair in
+                guard pair.count == 2,
+                      pair[0].count == 4,
+                      pair[1].count == 4 else { return nil }
+                let color1 = Color(.sRGB, red: pair[0][0], green: pair[0][1], blue: pair[0][2], opacity: pair[0][3])
+                let color2 = Color(.sRGB, red: pair[1][0], green: pair[1][1], blue: pair[1][2], opacity: pair[1][3])
+                return (color1, color2)
+            }
+        }
+        
+        // Load solid bottom colors
+        if let bottomColorsData = UserDefaults.standard.array(forKey: "solidBottomColors") as? [[CGFloat]] {
+            solidBottomColors = bottomColorsData.compactMap { components in
+                guard components.count == 4 else { return nil }
+                return Color(.sRGB, red: components[0], green: components[1], blue: components[2], opacity: components[3])
+            }
+        }
+        
+        // Load multi bottom colors
+        if let multiBottomColorsData = UserDefaults.standard.array(forKey: "multiBottomColors") as? [[[CGFloat]]] {
+            multiBottomColors = multiBottomColorsData.compactMap { pair in
+                guard pair.count == 2,
+                      pair[0].count == 4,
+                      pair[1].count == 4 else { return nil }
+                let color1 = Color(.sRGB, red: pair[0][0], green: pair[0][1], blue: pair[0][2], opacity: pair[0][3])
+                let color2 = Color(.sRGB, red: pair[1][0], green: pair[1][1], blue: pair[1][2], opacity: pair[1][3])
+                return (color1, color2)
+            }
+        }
+    }
+    
+    private func saveColors() {
+        // Save solid top colors
+        let topColorsData = solidTopColors.map { color -> [CGFloat] in
+            var red: CGFloat = 0
+            var green: CGFloat = 0
+            var blue: CGFloat = 0
+            var opacity: CGFloat = 0
+            UIColor(color).getRed(&red, green: &green, blue: &blue, alpha: &opacity)
+            return [red, green, blue, opacity]
+        }
+        UserDefaults.standard.set(topColorsData, forKey: "solidTopColors")
+        
+        // Save multi top colors
+        let multiTopColorsData = multiTopColors.map { pair -> [[CGFloat]] in
+            var red1: CGFloat = 0
+            var green1: CGFloat = 0
+            var blue1: CGFloat = 0
+            var opacity1: CGFloat = 0
+            UIColor(pair.0).getRed(&red1, green: &green1, blue: &blue1, alpha: &opacity1)
+            
+            var red2: CGFloat = 0
+            var green2: CGFloat = 0
+            var blue2: CGFloat = 0
+            var opacity2: CGFloat = 0
+            UIColor(pair.1).getRed(&red2, green: &green2, blue: &blue2, alpha: &opacity2)
+            
+            return [[red1, green1, blue1, opacity1], [red2, green2, blue2, opacity2]]
+        }
+        UserDefaults.standard.set(multiTopColorsData, forKey: "multiTopColors")
+        
+        // Save solid bottom colors
+        let bottomColorsData = solidBottomColors.map { color -> [CGFloat] in
+            var red: CGFloat = 0
+            var green: CGFloat = 0
+            var blue: CGFloat = 0
+            var opacity: CGFloat = 0
+            UIColor(color).getRed(&red, green: &green, blue: &blue, alpha: &opacity)
+            return [red, green, blue, opacity]
+        }
+        UserDefaults.standard.set(bottomColorsData, forKey: "solidBottomColors")
+        
+        // Save multi bottom colors
+        let multiBottomColorsData = multiBottomColors.map { pair -> [[CGFloat]] in
+            var red1: CGFloat = 0
+            var green1: CGFloat = 0
+            var blue1: CGFloat = 0
+            var opacity1: CGFloat = 0
+            UIColor(pair.0).getRed(&red1, green: &green1, blue: &blue1, alpha: &opacity1)
+            
+            var red2: CGFloat = 0
+            var green2: CGFloat = 0
+            var blue2: CGFloat = 0
+            var opacity2: CGFloat = 0
+            UIColor(pair.1).getRed(&red2, green: &green2, blue: &blue2, alpha: &opacity2)
+            
+            return [[red1, green1, blue1, opacity1], [red2, green2, blue2, opacity2]]
+        }
+        UserDefaults.standard.set(multiBottomColorsData, forKey: "multiBottomColors")
+    }
+    
+    func addSolidTopColor(_ color: Color) {
+        solidTopColors.append(color)
+        saveColors()
+    }
+    
+    func addMultiTopColor(_ colors: (Color, Color)) {
+        multiTopColors.append(colors)
+        saveColors()
+    }
+    
+    func addSolidBottomColor(_ color: Color) {
+        solidBottomColors.append(color)
+        saveColors()
+    }
+    
+    func addMultiBottomColor(_ colors: (Color, Color)) {
+        multiBottomColors.append(colors)
+        saveColors()
+    }
+    
+    func removeSolidTopColor(_ color: Color) {
+        solidTopColors.removeAll { $0 == color }
+        saveColors()
+    }
+    
+    func removeMultiTopColor(at index: Int) {
+        if index < multiTopColors.count {
+            multiTopColors.remove(at: index)
+            saveColors()
+        }
+    }
+    
+    func removeSolidBottomColor(_ color: Color) {
+        solidBottomColors.removeAll { $0 == color }
+        saveColors()
+    }
+    
+    func removeMultiBottomColor(at index: Int) {
+        if index < multiBottomColors.count {
+            multiBottomColors.remove(at: index)
+            saveColors()
+        }
+    }
+    
+    func updateFromSetup(topSolidColors: [Color], topMultiColors: [(Color, Color)], bottomSolidColors: [Color], bottomMultiColors: [(Color, Color)]) {
+        solidTopColors = topSolidColors
+        multiTopColors = topMultiColors
+        solidBottomColors = bottomSolidColors
+        multiBottomColors = bottomMultiColors
+        saveColors()
+    }
+}
+
 struct ColorClosetSegmentedView: View {
     enum ClosetSection: String, CaseIterable {
         case top = "Top"
@@ -10,6 +177,13 @@ struct ColorClosetSegmentedView: View {
     @State private var selectedSection: ClosetSection = .top
     @State private var selectedItem: SelectedItem? = nil
     @State private var showRecommendation = false
+    
+    // Add new state variables for color pickers
+    @State private var showSolidColorPicker = false
+    @State private var showMultiColorPicker = false
+    @State private var newColor: Color = .black
+    @State private var newMultiColor1: Color = .gray
+    @State private var newMultiColor2: Color = .blue
     
     enum SelectedItem {
         case solidTop(Color)
@@ -43,6 +217,15 @@ struct ColorClosetSegmentedView: View {
                                 },
                                 onSelect: { color in
                                     selectedItem = .solidTop(color)
+                                },
+                                onAddColor: {
+                                    showSolidColorPicker = true
+                                },
+                                onDelete: { color in
+                                    colorManager.removeSolidTopColor(color)
+                                    if case let .solidTop(selectedColor) = selectedItem, selectedColor == color {
+                                        selectedItem = nil
+                                    }
                                 }
                             )
                             .padding(.bottom, 30)
@@ -54,6 +237,15 @@ struct ColorClosetSegmentedView: View {
                                 },
                                 onSelect: { color in
                                     selectedItem = .solidBottom(color)
+                                },
+                                onAddColor: {
+                                    showSolidColorPicker = true
+                                },
+                                onDelete: { color in
+                                    colorManager.removeSolidBottomColor(color)
+                                    if case let .solidBottom(selectedColor) = selectedItem, selectedColor == color {
+                                        selectedItem = nil
+                                    }
                                 }
                             )
                             .padding(.bottom, 30)
@@ -71,6 +263,15 @@ struct ColorClosetSegmentedView: View {
                                 },
                                 onSelect: { idx in
                                     selectedItem = .multiTop(idx)
+                                },
+                                onAddColor: {
+                                    showMultiColorPicker = true
+                                },
+                                onDelete: { index in
+                                    colorManager.removeMultiTopColor(at: index)
+                                    if case let .multiTop(selectedIndex) = selectedItem, selectedIndex == index {
+                                        selectedItem = nil
+                                    }
                                 }
                             )
                         } else {
@@ -81,38 +282,75 @@ struct ColorClosetSegmentedView: View {
                                 },
                                 onSelect: { idx in
                                     selectedItem = .multiBottom(idx)
+                                },
+                                onAddColor: {
+                                    showMultiColorPicker = true
+                                },
+                                onDelete: { index in
+                                    colorManager.removeMultiBottomColor(at: index)
+                                    if case let .multiBottom(selectedIndex) = selectedItem, selectedIndex == index {
+                                        selectedItem = nil
+                                    }
                                 }
                             )
-                        }
-                        Spacer().frame(height: 215)
-                        
-                        Button(action: {
-                            showRecommendation = true
-                        }) {
-                            Text("Continue")
-                                .foregroundColor(.white)
-                                .frame(maxWidth: .infinity)
-                                .padding()
-                                .background(Color.black)
-                                .cornerRadius(14)
-                        }
-                        .disabled(selectedItem == nil)
-                        
-                        if let params = getRecommendationParams() {
-                            NavigationLink(
-                                destination: RecommendationView(selectedColor: params.color, uploadType: params.uploadType),
-                                isActive: $showRecommendation
-                            ) {
-                                EmptyView()
-                            }
                         }
                     }
                     .padding(.vertical)
                     .padding()
                 }
+                
+                VStack {
+                    Button(action: {
+                        showRecommendation = true
+                    }) {
+                        Text("Continue")
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(Color.black)
+                            .cornerRadius(14)
+                    }
+                    .disabled(selectedItem == nil)
+                    .padding(.horizontal)
+                    .padding(.bottom, 20)
+                    
+                    if let params = getRecommendationParams() {
+                        NavigationLink(
+                            destination: RecommendationView(selectedColor: params.color, uploadType: params.uploadType),
+                            isActive: $showRecommendation
+                        ) {
+                            EmptyView()
+                        }
+                    }
+                }
+                .background(Color.white)
             }
             .navigationTitle("Select 1 Color from Your Wardrobe")
             .navigationBarTitleDisplayMode(.inline)
+            .sheet(isPresented: $showSolidColorPicker) {
+                SolidColorPickerSheet(newColor: $newColor) {
+                    if selectedSection == .top {
+                        colorManager.addSolidTopColor(newColor)
+                        selectedItem = .solidTop(newColor)
+                    } else {
+                        colorManager.addSolidBottomColor(newColor)
+                        selectedItem = .solidBottom(newColor)
+                    }
+                    showSolidColorPicker = false
+                }
+            }
+            .sheet(isPresented: $showMultiColorPicker) {
+                MultiColorPickerSheet(newLeftColor: $newMultiColor1, newRightColor: $newMultiColor2) {
+                    if selectedSection == .top {
+                        colorManager.addMultiTopColor((newMultiColor1, newMultiColor2))
+                        selectedItem = .multiTop(colorManager.multiTopColors.count - 1)
+                    } else {
+                        colorManager.addMultiBottomColor((newMultiColor1, newMultiColor2))
+                        selectedItem = .multiBottom(colorManager.multiBottomColors.count - 1)
+                    }
+                    showMultiColorPicker = false
+                }
+            }
         }
     }
     
@@ -138,6 +376,8 @@ struct ColorBlockGridSingleSelect: View {
     let colors: [Color]
     let selectedColor: Color?
     let onSelect: (Color) -> Void
+    let onAddColor: () -> Void
+    let onDelete: (Color) -> Void
 
     var body: some View {
         LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 16), count: 4), spacing: 16) {
@@ -145,18 +385,48 @@ struct ColorBlockGridSingleSelect: View {
                 ZStack {
                     Rectangle()
                         .fill(color)
-                        .frame(width: 70, height: 55)
+                        .frame(width: 75, height: 55)
                         .cornerRadius(10)
                         .overlay(
                             RoundedRectangle(cornerRadius: 10)
                                 .stroke(selectedColor == color ? Color.blue : Color.clear, lineWidth: 2)
                         )
-                        .shadow(radius: 2)
+                        .shadow(color: Color.black.opacity(0.25), radius: 4, x: 0, y: 4)
+                    
+                    if selectedColor == color {
+                        VStack {
+                            HStack {
+                                Spacer()
+                                Image(systemName: "checkmark.circle.fill")
+                                    .foregroundColor(.white)
+                                    .background(Circle().fill(Color.blue))
+                                    .font(.system(size: 16))
+                                    .padding(4)
+                            }
+                            Spacer()
+                            HStack {
+                                Button(action: { onDelete(color) }) {
+                                    Image(systemName: "trash")
+                                        .foregroundColor(.white)
+                                        .font(.system(size: 14))
+                                        .padding(4)
+                                        .background(Color.red)
+                                        .clipShape(Circle())
+                                }
+                                .padding(4)
+                                Spacer()
+                            }
+                        }
+                        .frame(width: 75, height: 55)
+                    }
                 }
                 .onTapGesture {
                     onSelect(color)
                 }
             }
+            
+            AddColorBlock(action: onAddColor as () -> Void)
+                .frame(width: 75, height: 55)
         }
         .padding(.horizontal)
     }
@@ -166,6 +436,8 @@ struct MultiColorBlockGridSingleSelect: View {
     let colors: [(Color, Color)]
     let selectedIndex: Int?
     let onSelect: (Int) -> Void
+    let onAddColor: () -> Void
+    let onDelete: (Int) -> Void
 
     var body: some View {
         LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 16), count: 4), spacing: 16) {
@@ -176,18 +448,48 @@ struct MultiColorBlockGridSingleSelect: View {
                         Rectangle().fill(pair.0)
                         Rectangle().fill(pair.1)
                     }
-                    .frame(width: 70, height: 55)
+                    .frame(width: 75, height: 55)
                     .cornerRadius(10)
                     .overlay(
                         RoundedRectangle(cornerRadius: 10)
                             .stroke(selectedIndex == index ? Color.blue : Color.clear, lineWidth: 2)
                     )
-                    .shadow(radius: 2)
+                    .shadow(color: Color.black.opacity(0.25), radius: 4, x: 0, y: 4)
+                    
+                    if selectedIndex == index {
+                        VStack {
+                            HStack {
+                                Spacer()
+                                Image(systemName: "checkmark.circle.fill")
+                                    .foregroundColor(.white)
+                                    .background(Circle().fill(Color.blue))
+                                    .font(.system(size: 16))
+                                    .padding(4)
+                            }
+                            Spacer()
+                            HStack {
+                                Button(action: { onDelete(index) }) {
+                                    Image(systemName: "trash")
+                                        .foregroundColor(.white)
+                                        .font(.system(size: 14))
+                                        .padding(4)
+                                        .background(Color.red)
+                                        .clipShape(Circle())
+                                }
+                                .padding(4)
+                                Spacer()
+                            }
+                        }
+                        .frame(width: 75, height: 55)
+                    }
                 }
                 .onTapGesture {
                     onSelect(index)
                 }
             }
+            
+            AddColorBlock(action: onAddColor as () -> Void)
+                .frame(width: 75, height: 55)
         }
         .padding(.horizontal)
     }

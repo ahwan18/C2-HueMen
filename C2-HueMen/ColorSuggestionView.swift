@@ -8,8 +8,8 @@ import SwiftUI
 
 struct RecommendationView: View {
     enum Mode {
-        case top // user memilih warna pants (bottom)
-        case bottom // user memilih warna baju (top)
+        case toP
+        case bottom
     }
     
     enum SectionTitle: String {
@@ -26,7 +26,6 @@ struct RecommendationView: View {
     @State private var selectedCompatibleColor: ColorItem?
     @State private var isDoneActive = false
     
-    // Developer dapat mengubah nilai default di sini:
     @State private var leftWidthRatio: CGFloat = -0.020
     @State private var rightWidthRatio: CGFloat = 1
     
@@ -79,50 +78,65 @@ struct RecommendationView: View {
                     }
                     .padding(.horizontal)
                     
+                    
                     // Compatibility Palette
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text("Most compatible:")
-                            .fontWeight(.semibold)
-                            .foregroundStyle(.black)
-                        HStack(alignment: .center, spacing: 16) {
-                            if let mostCompatible = mostCompatibleColor {
-                                VStack(spacing: 8) {
+                    if compatibleColors.isEmpty && mostCompatibleColor == nil {
+                        VStack(spacing: 20) {
+                            Text("Oops!")
+                                .font(.system(size: 50, weight: .semibold))
+                                .foregroundStyle(.black)
+                            Text("Looks like there's no match for this color from your wardrobe.")
+                                .font(.title3)
+                                .multilineTextAlignment(.center)
+                                .foregroundStyle(.black)
+                                .padding(.horizontal, 20)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                        .padding(.vertical, 20)
+                    } else {
+                        VStack(alignment: .leading, spacing: 12) {
+                            Text("Most compatible:")
+                                .fontWeight(.semibold)
+                                .foregroundStyle(.black)
+                            HStack(alignment: .center, spacing: 16) {
+                                if let mostCompatible = mostCompatibleColor {
                                     ColorBlocks(color: mostCompatible.color, isSelected: selectedCompatibleColor?.id == mostCompatible.id)
                                         .onTapGesture {
                                             selectedCompatibleColor = mostCompatible
                                         }
+                                    }
                                 }
+                                Spacer()
                             }
-                            Spacer()
-                        }
-                        
-                        if !compatibleColors.isEmpty {
-                            Text("Other compatible colors:")
-                                .foregroundStyle(.black)
-                            HStack(alignment: .center, spacing: 16) {
-                                ForEach(compatibleColors) { colorItem in
-                                    if colorItem.id != mostCompatibleColor?.id {
-                                        VStack(spacing: 8) {
+                            
+                            if !compatibleColors.isEmpty {
+                                Text("Other compatible colors:")
+                                    .foregroundStyle(.black)
+                                HStack(alignment: .center, spacing: 16) {
+                                    ForEach(compatibleColors) { colorItem in
+                                        if colorItem.id != mostCompatibleColor?.id {
                                             ColorBlocks(color: colorItem.color, isSelected: selectedCompatibleColor?.id == colorItem.id)
                                                 .onTapGesture {
                                                     selectedCompatibleColor = colorItem
                                                 }
                                         }
                                     }
+                                    Spacer()
                                 }
-                                Spacer()
                             }
                         }
+                        .padding()
+                        .frame(maxWidth: .infinity)
+                        .background(Color(.backgroundRecommendation))
+                        .cornerRadius(16)
+                        .shadow(radius: 2)
+                        .padding(.horizontal)
                     }
-                    .padding()
-                    .frame(maxWidth: .infinity)
-                    .background(Color(.backgroundRecommendation))
-                    .cornerRadius(16)
-                    .shadow(radius: 2)
-                    .padding(.horizontal)
+                    
+                    Spacer()
                     
                     // Done button
-                    Button("Done") {
+                    Button(compatibleColors.isEmpty && mostCompatibleColor == nil ? "Pick Again" : "Done") {
                         isDoneActive = true
                     }
                     .foregroundColor(.white)

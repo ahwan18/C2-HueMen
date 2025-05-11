@@ -9,6 +9,27 @@ class ColorClosetManager: ObservableObject {
     static let shared = ColorClosetManager()
     
     private init() {
+        // Add default colors if no colors are saved
+        if UserDefaults.standard.array(forKey: "solidTopColors") == nil {
+            solidTopColors = [
+                .white, .black, .gray, 
+                Color(red: 0.0, green: 0.2, blue: 0.4), // navy
+                Color(red: 0.7, green: 0.85, blue: 1.0), // light blue
+                .brown, .red, .blue, .green
+            ]
+            saveColors()
+        }
+        
+        if UserDefaults.standard.array(forKey: "solidBottomColors") == nil {
+            solidBottomColors = [
+                .white, .black, .gray, 
+                Color(red: 0.0, green: 0.2, blue: 0.4), // navy
+                Color(red: 0.7, green: 0.85, blue: 1.0), // light blue
+                .brown, .red, .blue, .green
+            ]
+            saveColors()
+        }
+        
         loadColors()
     }
     

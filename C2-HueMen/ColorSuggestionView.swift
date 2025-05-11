@@ -17,26 +17,18 @@ struct RecommendationView: View {
         case bottom = "Bottom Colors"
     }
     
-    // Add parameters for selected color and upload type
     let selectedColor: Color
     let uploadType: UploadType
     
-    // Sekarang, gunakan mode .top
-//    var mode: Mode = .top
-    
-    @State private var topColor: Color = .brown
-    @State private var bottomColor: Color = .teal
-    @State private var selectedBottomIndex: Int = 0
-    @State private var selectedTopIndex: Int = 0
+    @StateObject private var colorManager = ColorClosetManager.shared
+    @State private var compatibleColors: [Color] = []
+    @State private var mostCompatibleColor: Color?
+    @State private var selectedCompatibleColor: Color?
+    @State private var isDoneActive = false
     
     // Developer dapat mengubah nilai default di sini:
     @State private var leftWidthRatio: CGFloat = -0.020
     @State private var rightWidthRatio: CGFloat = 1
-    
-    let bottomOptions: [Color] = [.teal, .black, .gray, .brown, .green]
-    let topOptions: [Color] = [.brown, .white, .black, .gray, .blue]
-    
-    @State private var isDoneActive = false
     
     var body: some View {
         NavigationStack {
@@ -64,10 +56,10 @@ struct RecommendationView: View {
                                 .resizable()
                                 .aspectRatio(contentMode: .fit)
                                 .frame(width: 125, height: 120)
-                                .foregroundColor(topColor)
+                                .foregroundColor(uploadType == .top ? selectedColor : (selectedCompatibleColor ?? selectedColor))
                                 .padding(.bottom, 0)
                             PantsShape(leftWidthRatio: leftWidthRatio, rightWidthRatio: rightWidthRatio)
-                                .fill(bottomColor)
+                                .fill(uploadType == .top ? (selectedCompatibleColor ?? selectedColor) : selectedColor)
                                 .frame(width: 70, height: 145)
                         }
                     }
@@ -79,35 +71,26 @@ struct RecommendationView: View {
                             .fontWeight(.semibold)
                             .foregroundStyle(.black)
                         HStack {
-                            if uploadType == .top {
-                                ColorBlocks(color: bottomOptions.first ?? .clear, isSelected: selectedBottomIndex == 0)
+                            if let mostCompatible = mostCompatibleColor {
+                                ColorBlocks(color: mostCompatible, isSelected: selectedCompatibleColor == mostCompatible)
                                     .onTapGesture {
-                                        bottomColor = bottomOptions.first ?? .clear
-                                        selectedBottomIndex = 0
-                                    }
-                            } else {
-                                ColorBlocks(color: topOptions.first ?? .clear, isSelected: selectedTopIndex == 0)
-                                    .onTapGesture {
-                                        topColor = topOptions.first ?? .clear
-                                        selectedTopIndex = 0
+                                        selectedCompatibleColor = mostCompatible
                                     }
                             }
                         }
-                        Text("Compatible colors:")
-                            .foregroundStyle(.black)
-                        HStack(spacing: 16) {
-                            if uploadType == .top {
-                                CompatibleBottomColorsView(
-                                    bottomOptions: bottomOptions,
-                                    selectedBottomIndex: $selectedBottomIndex,
-                                    bottomColor: $bottomColor
-                                )
-                            } else {
-                                CompatibleTopColorsView(
-                                    topOptions: topOptions,
-                                    selectedTopIndex: $selectedTopIndex,
-                                    topColor: $topColor
-                                )
+                        
+                        if !compatibleColors.isEmpty {
+                            Text("Other compatible colors:")
+                                .foregroundStyle(.black)
+                            HStack(spacing: 16) {
+                                ForEach(compatibleColors, id: \.self) { color in
+                                    if color != mostCompatibleColor {
+                                        ColorBlocks(color: color, isSelected: selectedCompatibleColor == color)
+                                            .onTapGesture {
+                                                selectedCompatibleColor = color
+                                            }
+                                    }
+                                }
                             }
                         }
                     }
@@ -135,62 +118,42 @@ struct RecommendationView: View {
                 .navigationBarBackButtonHidden()
                 .padding(.top)
                 .onAppear {
-                    // Set the initial color based on uploadType
-                    if uploadType == .top {
-                        topColor = selectedColor
-                    } else {
-                        bottomColor = selectedColor
-                    }
+                    updateCompatibleColors()
                 }
             }
         }
     }
     
+    private func updateCompatibleColors() {
+        let wardrobe = uploadType == .top ? colorManager.solidBottomColors : colorManager.solidTopColors
+        
+        // Get compatible colors using color theory
+        compatibleColors = ColorTheoryManager.shared.getCompatibleColors(from: wardrobe, for: selectedColor)
+        
+        // Get most compatible color
+        mostCompatibleColor = ColorTheoryManager.shared.getMostCompatibleColor(from: wardrobe, for: selectedColor)
+        
+        // Set initial selected compatible color
+        selectedCompatibleColor = mostCompatibleColor
+        
+        print("Selected color: \(selectedColor)")
+        print("Wardrobe colors: \(wardrobe)")
+        print("Compatible colors: \(compatibleColors)")
+        print("Most compatible: \(String(describing: mostCompatibleColor))")
+    }
+    
     struct ColorBlocks: View {
-        var color: Color
-        var isSelected: Bool
+        let color: Color
+        let isSelected: Bool
         
         var body: some View {
-            RoundedRectangle(cornerRadius: 10)
+            RoundedRectangle(cornerRadius: 8)
                 .fill(color)
-                .frame(width: 70, height: 55)
+                .frame(width: 60, height: 60)
                 .overlay(
-                    RoundedRectangle(cornerRadius: 10)
-                        .stroke(isSelected ? Color.blue : Color.gray.opacity(0.3), lineWidth: isSelected ? 2 : 1)
+                    RoundedRectangle(cornerRadius: 8)
+                        .stroke(isSelected ? Color.blue : Color.clear, lineWidth: 3)
                 )
-                .shadow(color: Color.black.opacity(0.25), radius: 4, x: 0, y: 4)
-        }
-    }
-    
-    struct CompatibleBottomColorsView: View {
-        let bottomOptions: [Color]
-        @Binding var selectedBottomIndex: Int
-        @Binding var bottomColor: Color
-        
-        var body: some View {
-            ForEach(Array(bottomOptions.indices.dropFirst()), id: \.self) { index in
-                ColorBlocks(color: bottomOptions[index], isSelected: selectedBottomIndex == index)
-                    .onTapGesture {
-                        bottomColor = bottomOptions[index]
-                        selectedBottomIndex = index
-                    }
-            }
-        }
-    }
-    
-    struct CompatibleTopColorsView: View {
-        let topOptions: [Color]
-        @Binding var selectedTopIndex: Int
-        @Binding var topColor: Color
-        
-        var body: some View {
-            ForEach(Array(topOptions.indices.dropFirst()), id: \.self) { index in
-                ColorBlocks(color: topOptions[index], isSelected: selectedTopIndex == index)
-                    .onTapGesture {
-                        topColor = topOptions[index]
-                        selectedTopIndex = index
-                    }
-            }
         }
     }
     

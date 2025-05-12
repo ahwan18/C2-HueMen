@@ -241,20 +241,27 @@ struct ColorClosetSegmentedView: View {
                             Text("Solid Color")
                                 .font(.headline)
                             Spacer()
-                            Button(action: {
-                                if selectedSection == .top {
-                                    colorManager.solidTopColors.removeAll()
-                                } else {
-                                    colorManager.solidBottomColors.removeAll()
+                            // Show delete button only if a solid color is selected
+                            if let selectedItem = selectedItem, case .solidTop(_) = selectedItem, selectedSection == .top {
+                                Button(action: {
+                                    if case let .solidTop(color) = selectedItem {
+                                        colorManager.removeSolidTopColor(color)
+                                        self.selectedItem = nil
+                                    }
+                                }) {
+                                    Image(systemName: "trash")
+                                        .foregroundColor(.red)
                                 }
-                                if case let .solidTop(_) = selectedItem {
-                                    selectedItem = nil
-                                } else if case let .solidBottom(_) = selectedItem {
-                                    selectedItem = nil
+                            } else if let selectedItem = selectedItem, case .solidBottom(_) = selectedItem, selectedSection == .bottom {
+                                Button(action: {
+                                    if case let .solidBottom(color) = selectedItem {
+                                        colorManager.removeSolidBottomColor(color)
+                                        self.selectedItem = nil
+                                    }
+                                }) {
+                                    Image(systemName: "trash")
+                                        .foregroundColor(.red)
                                 }
-                            }) {
-                                Image(systemName: "trash")
-                                    .foregroundColor(.red)
                             }
                         }
                         .padding(.horizontal)
@@ -295,20 +302,27 @@ struct ColorClosetSegmentedView: View {
                             Text("Multi Color")
                                 .font(.headline)
                             Spacer()
-                            Button(action: {
-                                if selectedSection == .top {
-                                    colorManager.multiTopColors.removeAll()
-                                } else {
-                                    colorManager.multiBottomColors.removeAll()
+                            // Show delete button only if a multi color is selected
+                            if let selectedItem = selectedItem, case .multiTop(_) = selectedItem, selectedSection == .top {
+                                Button(action: {
+                                    if case let .multiTop(index) = selectedItem {
+                                        colorManager.removeMultiTopColor(at: index)
+                                        self.selectedItem = nil
+                                    }
+                                }) {
+                                    Image(systemName: "trash")
+                                        .foregroundColor(.red)
                                 }
-                                if case let .multiTop(_) = selectedItem {
-                                    selectedItem = nil
-                                } else if case let .multiBottom(_) = selectedItem {
-                                    selectedItem = nil
+                            } else if let selectedItem = selectedItem, case .multiBottom(_) = selectedItem, selectedSection == .bottom {
+                                Button(action: {
+                                    if case let .multiBottom(index) = selectedItem {
+                                        colorManager.removeMultiBottomColor(at: index)
+                                        self.selectedItem = nil
+                                    }
+                                }) {
+                                    Image(systemName: "trash")
+                                        .foregroundColor(.red)
                                 }
-                            }) {
-                                Image(systemName: "trash")
-                                    .foregroundColor(.red)
                             }
                         }
                         .padding(.horizontal)

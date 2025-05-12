@@ -8,7 +8,6 @@
 import SwiftUI
 
 struct HomeScreen: View {
-    @State private var navigateToColorCloset = false
     @State private var showUploadOptions = false
     @State private var selectedUploadType: UploadType?
     @State private var navigateToColorSegmented = false
@@ -25,7 +24,7 @@ struct HomeScreen: View {
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 40)
                 
-                Text("We’ll help you find the best mix and match based on your colors")
+                Text("We'll help you find the best mix and match based on your colors")
                     .font(.callout)
                     .foregroundColor(Color.description)
                     .multilineTextAlignment(.center)
@@ -35,9 +34,7 @@ struct HomeScreen: View {
                 Spacer().frame(height: 60)
                 
                 Button(action: {
-                    withAnimation {
-                        showUploadOptions = true
-                    }
+                    showUploadOptions = true
                 }) {
                     Text("Take a photo")
                         .foregroundColor(.white)
@@ -47,68 +44,44 @@ struct HomeScreen: View {
                         .cornerRadius(10)
                         .shadow(radius: 4, y: 2)
                 }
-                .padding(.horizontal, 40)
-                
                 .confirmationDialog("", isPresented: $showUploadOptions, titleVisibility: .hidden) {
-                    Button {
-                        selectedUploadType = .top
-                    } label: {
-                        Label("Upload Top", systemImage: "tshirt")
-                    }
-                    .navigationDestination(for: UploadType.self) { type in
-                        CameraColorDetectorView(uploadType: type)
-                    }
-                    
-                    Button {
-                        selectedUploadType = .bottom
-                    } label: {
-                        Label("Upload Bottom", systemImage: "figure.walk")
-                    }
-                    
+                    Button("Upload Top", action: { selectedUploadType = .top })
+                    Button("Upload Bottom", action: { selectedUploadType = .bottom })
                     Button("Cancel", role: .cancel) {}
                 }
-                .navigationDestination(item: $selectedUploadType) { type in
-                    CameraColorDetectorView(uploadType: type)
+                
+                // Trigger navigation from selectedUploadType
+                if let type = selectedUploadType {
+                    NavigationLink(
+                        destination: CameraColorDetectorView(uploadType: type),
+                        isActive: Binding(
+                            get: { selectedUploadType != nil },
+                            set: { newValue in
+                                if !newValue { selectedUploadType = nil }
+                            }
+                        )
+                    ) {
+                        EmptyView()
+                    }
                 }
-                
-                
+
                 Text("or")
                     .padding(.vertical, 5)
                     .foregroundStyle(.black)
                 
-                Button(action: {
-                    navigateToColorSegmented = true
-                }) {
+                NavigationLink(destination: ColorClosetSegmentedView(), isActive: $navigateToColorSegmented) {
                     Text("Pick from wardrobe")
                         .foregroundColor(.white)
                         .frame(maxWidth: 198, maxHeight: 15)
                         .padding()
-                        .background(.description)
+                        .background(Color.description)
                         .cornerRadius(10)
                         .shadow(radius: 4, y: 2)
                 }
                 .padding(.horizontal, 40)
-                .navigationDestination(isPresented: $navigateToColorSegmented) {
-                    ColorClosetSegmentedView()
-                    }
                 
                 Spacer()
             }
-//            .navigationBarItems(trailing:
-//                                    Button(action: {
-//                navigateToColorCloset = true
-//            }) {
-//                Image(systemName: "cabinet.fill")
-//                    .foregroundStyle(.black)
-//                    .padding(10)
-//                    .background(Color.gray.opacity(0.2))
-//                    .clipShape(Circle())
-//            }
-//            )
-//            .navigationDestination(isPresented: $navigateToColorCloset) {
-//                ColorClosetView()
-//                }
-            
             .background(
                 ZStack {
                     HStack {
@@ -139,21 +112,15 @@ struct HomeScreen: View {
                                 .frame(width: 260, height: 300)
                                 .offset(x: 190, y: 170)
                         }
-                        
                     }
                 }
             )
             .ignoresSafeArea()
-            .background(
-                Color(.white)
-            )
+            .background(Color.white)
         }
         .navigationBarBackButtonHidden()
-        
     }
-    
 }
-
 
 #Preview {
     HomeScreen()

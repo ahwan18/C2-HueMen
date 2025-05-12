@@ -165,17 +165,18 @@ struct RecommendationView: View {
                     .cornerRadius(10)
                     .padding(.horizontal)
                     
-                    NavigationLink(destination: HomeScreen(), isActive: $isDoneActive) {
+                    NavigationLink(destination: HomeScreen().navigationBarBackButtonHidden(true), isActive: $isDoneActive) {
                         EmptyView()
                     }
                 }
-                .navigationBarBackButtonHidden()
+                .navigationBarBackButtonHidden(true)
                 .padding(.top)
                 .onAppear {
                     updateCompatibleColors()
                 }
             }
         }
+        .navigationViewStyle(.stack)
         .alert("Add to Wardrobe", isPresented: $showAddToWardrobeAlert) {
             Button("OK", role: .cancel) { }
         } message: {

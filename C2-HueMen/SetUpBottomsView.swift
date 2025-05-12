@@ -58,17 +58,17 @@ struct SelectBottomColorsView: View {
                         showSolidColorPicker = true
                     }
                 )
-                // Multi Color Section
-                SectionTitle(text: "Multi Color")
-                    .padding(.top, 35)
-                    .foregroundStyle(.black)
-                MultiColorBlockGrid(
-                    colors: multiBottomColors,
-                    selectedIndices: $selectedMultiBottomColors,
-                    onAddColor: {
-                        showMultiColorPicker = true
-                    }
-                )
+//                // Multi Color Section
+//                SectionTitle(text: "Multi Color")
+//                    .padding(.top, 35)
+//                    .foregroundStyle(.black)
+//                MultiColorBlockGrid(
+//                    colors: multiBottomColors,
+//                    selectedIndices: $selectedMultiBottomColors,
+//                    onAddColor: {
+//                        showMultiColorPicker = true
+//                    }
+//                )
                 Spacer()
                 
                 NavigationLink(destination: HomeScreen(), isActive: $navigateToHome) {

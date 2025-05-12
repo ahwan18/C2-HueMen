@@ -357,7 +357,7 @@ struct ColorClosetSegmentedView: View {
                             )
                         }
                     }
-                    .padding(.bottom, 20)
+                    .padding(.top, 30)
                 }
 
                 VStack {

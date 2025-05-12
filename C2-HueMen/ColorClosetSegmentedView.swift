@@ -327,10 +327,9 @@ struct ColorClosetSegmentedView: View {
                             )
                         }
                     }
-                    .padding(.vertical)
-                    .padding()
+                    .padding(.bottom, 20)
                 }
-                
+
                 VStack {
                     Button(action: {
                         showRecommendation = true
@@ -348,7 +347,8 @@ struct ColorClosetSegmentedView: View {
                     
                     if let params = getRecommendationParams() {
                         NavigationLink(
-                            destination: RecommendationView(selectedColor: params.color, uploadType: params.uploadType),
+                            destination: RecommendationView(selectedColor: params.color, uploadType: params.uploadType)
+                                .navigationBarBackButtonHidden(true),
                             isActive: $showRecommendation
                         ) {
                             EmptyView()
@@ -359,6 +359,8 @@ struct ColorClosetSegmentedView: View {
             }
             .navigationTitle("Select 1 Color from Your Wardrobe")
             .navigationBarTitleDisplayMode(.inline)
+            .navigationBarBackButtonHidden(false)
+            .navigationViewStyle(.stack)
             .sheet(isPresented: $showSolidColorPicker) {
                 SolidColorPickerSheet(newColor: $newColor) {
                     if isDuplicateSolidColor(newColor) {

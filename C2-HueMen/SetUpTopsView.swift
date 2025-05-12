@@ -4,9 +4,9 @@ struct SelectTopColorsView: View {
     var onSetupComplete: (() -> Void)? = nil
     @StateObject private var colorManager = ColorClosetManager.shared
     @State private var solidColors: [Color] = [
-        .white, .black, .gray, Color(red: 0.0, green: 0.2, blue: 0.4), // navy
+        .white, .black, .gray, .brown, .uGreen, Color(red: 0.0, green: 0.2, blue: 0.4), // navy
         Color(red: 0.7, green: 0.85, blue: 1.0), // light blue
-        .brown
+        .uYellow, .uRed, .uPink
     ]
     @State private var multiColors: [(Color, Color)] = [
         (.white, .blue),

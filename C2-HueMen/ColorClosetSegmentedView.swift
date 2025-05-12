@@ -237,9 +237,27 @@ struct ColorClosetSegmentedView: View {
 
                 ScrollView {
                     VStack(alignment: .leading, spacing: 20) {
-                        Text("Solid Color")
-                            .font(.headline)
-                            .padding(.horizontal)
+                        HStack {
+                            Text("Solid Color")
+                                .font(.headline)
+                            Spacer()
+                            Button(action: {
+                                if selectedSection == .top {
+                                    colorManager.solidTopColors.removeAll()
+                                } else {
+                                    colorManager.solidBottomColors.removeAll()
+                                }
+                                if case let .solidTop(_) = selectedItem {
+                                    selectedItem = nil
+                                } else if case let .solidBottom(_) = selectedItem {
+                                    selectedItem = nil
+                                }
+                            }) {
+                                Image(systemName: "trash")
+                                    .foregroundColor(.red)
+                            }
+                        }
+                        .padding(.horizontal)
 
                         if selectedSection == .top {
                             ColorBlockGridSingleSelect(
@@ -253,12 +271,7 @@ struct ColorClosetSegmentedView: View {
                                 onAddColor: {
                                     showSolidColorPicker = true
                                 },
-                                onDelete: { color in
-                                    colorManager.removeSolidTopColor(color)
-                                    if case let .solidTop(selectedColor) = selectedItem, selectedColor == color {
-                                        selectedItem = nil
-                                    }
-                                }
+                                onDelete: { _ in }
                             )
                             .padding(.bottom, 30)
                         } else {
@@ -273,19 +286,32 @@ struct ColorClosetSegmentedView: View {
                                 onAddColor: {
                                     showSolidColorPicker = true
                                 },
-                                onDelete: { color in
-                                    colorManager.removeSolidBottomColor(color)
-                                    if case let .solidBottom(selectedColor) = selectedItem, selectedColor == color {
-                                        selectedItem = nil
-                                    }
-                                }
+                                onDelete: { _ in }
                             )
                             .padding(.bottom, 30)
                         }
 
-                        Text("Multi Color")
-                            .font(.headline)
-                            .padding(.horizontal)
+                        HStack {
+                            Text("Multi Color")
+                                .font(.headline)
+                            Spacer()
+                            Button(action: {
+                                if selectedSection == .top {
+                                    colorManager.multiTopColors.removeAll()
+                                } else {
+                                    colorManager.multiBottomColors.removeAll()
+                                }
+                                if case let .multiTop(_) = selectedItem {
+                                    selectedItem = nil
+                                } else if case let .multiBottom(_) = selectedItem {
+                                    selectedItem = nil
+                                }
+                            }) {
+                                Image(systemName: "trash")
+                                    .foregroundColor(.red)
+                            }
+                        }
+                        .padding(.horizontal)
 
                         if selectedSection == .top {
                             MultiColorBlockGridSingleSelect(
@@ -299,12 +325,7 @@ struct ColorClosetSegmentedView: View {
                                 onAddColor: {
                                     showMultiColorPicker = true
                                 },
-                                onDelete: { index in
-                                    colorManager.removeMultiTopColor(at: index)
-                                    if case let .multiTop(selectedIndex) = selectedItem, selectedIndex == index {
-                                        selectedItem = nil
-                                    }
-                                }
+                                onDelete: { _ in }
                             )
                         } else {
                             MultiColorBlockGridSingleSelect(
@@ -318,12 +339,7 @@ struct ColorClosetSegmentedView: View {
                                 onAddColor: {
                                     showMultiColorPicker = true
                                 },
-                                onDelete: { index in
-                                    colorManager.removeMultiBottomColor(at: index)
-                                    if case let .multiBottom(selectedIndex) = selectedItem, selectedIndex == index {
-                                        selectedItem = nil
-                                    }
-                                }
+                                onDelete: { _ in }
                             )
                         }
                     }
@@ -453,18 +469,6 @@ struct ColorBlockGridSingleSelect: View {
                                     .padding(4)
                             }
                             Spacer()
-                            HStack {
-                                Button(action: { onDelete(color) }) {
-                                    Image(systemName: "trash")
-                                        .foregroundColor(.white)
-                                        .font(.system(size: 14))
-                                        .padding(4)
-                                        .background(Color.red)
-                                        .clipShape(Circle())
-                                }
-                                .padding(4)
-                                Spacer()
-                            }
                         }
                         .frame(width: 75, height: 55)
                     }
@@ -516,18 +520,6 @@ struct MultiColorBlockGridSingleSelect: View {
                                     .padding(4)
                             }
                             Spacer()
-                            HStack {
-                                Button(action: { onDelete(index) }) {
-                                    Image(systemName: "trash")
-                                        .foregroundColor(.white)
-                                        .font(.system(size: 14))
-                                        .padding(4)
-                                        .background(Color.red)
-                                        .clipShape(Circle())
-                                }
-                                .padding(4)
-                                Spacer()
-                            }
                         }
                         .frame(width: 75, height: 55)
                     }

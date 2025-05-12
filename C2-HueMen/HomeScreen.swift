@@ -45,24 +45,30 @@ struct HomeScreen: View {
                         .shadow(radius: 4, y: 2)
                 }
                 .confirmationDialog("", isPresented: $showUploadOptions, titleVisibility: .hidden) {
-                    Button("Upload Top", action: { selectedUploadType = .top })
-                    Button("Upload Bottom", action: { selectedUploadType = .bottom })
+                    Button("Upload Top") {
+                        selectedUploadType = .top
+                    }
+                    Button("Upload Bottom") {
+                        selectedUploadType = .bottom
+                    }
                     Button("Cancel", role: .cancel) {}
                 }
                 
-                // Trigger navigation from selectedUploadType
-                if let type = selectedUploadType {
-                    NavigationLink(
-                        destination: CameraColorDetectorView(uploadType: type),
-                        isActive: Binding(
-                            get: { selectedUploadType != nil },
-                            set: { newValue in
-                                if !newValue { selectedUploadType = nil }
-                            }
-                        )
-                    ) {
-                        EmptyView()
-                    }
+                // Always-rendered NavigationLinks
+                NavigationLink(
+                    destination: CameraColorDetectorView(uploadType: .top),
+                    tag: UploadType.top,
+                    selection: $selectedUploadType
+                ) {
+                    EmptyView()
+                }
+
+                NavigationLink(
+                    destination: CameraColorDetectorView(uploadType: .bottom),
+                    tag: UploadType.bottom,
+                    selection: $selectedUploadType
+                ) {
+                    EmptyView()
                 }
 
                 Text("or")

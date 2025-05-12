@@ -75,26 +75,26 @@ class ColorTheoryManager {
 //        /// Get compatible colors from a wardrobe based on color theory
 //        func getCompatibleColors(from wardrobe: [Color], for baseColor: Color, tolerance: CGFloat = 10) -> [Color] {
 //            guard let baseHSB = UIColor(baseColor).toHSB() else { return [] }
-//    
+//
 //            // Get all possible compatible hues based on color theory
 //            var compatibleHues: Set<CGFloat> = []
-//    
+//
 //            // Add complementary
 //            compatibleHues.insert(getComplementaryColor(hue: baseHSB.hue))
-//    
+//
 //            // Add triadic
 //            compatibleHues.formUnion(getTriadicColors(hue: baseHSB.hue))
-//    
+//
 //            // Add split complementary
 //            compatibleHues.formUnion(getSplitComplementaryColors(hue: baseHSB.hue))
-//    
+//
 //            // Add analogous
 //            compatibleHues.formUnion(getAnalogousColors(hue: baseHSB.hue))
-//    
+//
 //            // Filter wardrobe colors based on compatibility
 //            return wardrobe.filter { color in
 //                guard let hsb = UIColor(color).toHSB() else { return false }
-//    
+//
 //                // Check if the hue is within tolerance of any compatible hue
 //                return compatibleHues.contains { compatibleHue in
 //                    isColorCompatible(hue1: hsb.hue, hue2: compatibleHue, tolerance: tolerance)
@@ -138,47 +138,84 @@ class ColorTheoryManager {
 //        /// Get the most compatible color from a wardrobe based on color theory
 //        func getMostCompatibleColor(from wardrobe: [Color], for baseColor: Color) -> Color? {
 //            guard let baseHSB = UIColor(baseColor).toHSB() else { return nil }
-//    
+//
 //            // Get complementary color as the most compatible
 //            let complementaryHue = getComplementaryColor(hue: baseHSB.hue)
-//    
+//
 //            // Find the color in wardrobe closest to complementary
 //            return wardrobe.min { color1, color2 in
 //                guard let hsb1 = UIColor(color1).toHSB(),
 //                      let hsb2 = UIColor(color2).toHSB() else {
 //                    return false
 //                }
-//    
+//
 //                let diff1 = abs(hsb1.hue - complementaryHue)
 //                let diff2 = abs(hsb2.hue - complementaryHue)
-//    
+//
 //                return min(diff1, 360 - diff1) < min(diff2, 360 - diff2)
 //            }
 //        }
     
 //    Get the most compatible color from a wardrobe based on all major color harmony rules
     func getMostCompatibleColor(from wardrobe: [Color], for baseColor: Color) -> Color? {
-        // Dapatkan warna-warna yang sudah lolos dari teori harmonisasi
-        let compatibleColors = getCompatibleColors(from: wardrobe, for: baseColor)
-        
         guard let baseHSB = UIColor(baseColor).toHSB() else { return nil }
-        let complementaryHue = getComplementaryColor(hue: baseHSB.hue)
-        
-        // Dari warna yang lolos saja, cari yang paling dekat ke complementary hue
-        return compatibleColors.min { color1, color2 in
+
+        var neutralColors: [Color] = []
+        var monochromeColors: [Color] = []
+        var harmonyColors: [Color] = []
+
+        for color in wardrobe {
+            guard let hsb = UIColor(color).toHSB() else { continue }
+            let uiColor = UIColor(color)
+
+            if isTrulyNeutral(color: uiColor) || isNeutralColor(saturation: hsb.saturation, brightness: hsb.brightness) {
+                neutralColors.append(color)
+            } else if isMonochromatic(hue1: hsb.hue, hue2: baseHSB.hue) {
+                monochromeColors.append(color)
+            } else {
+                let harmonyHues: Set<CGFloat> = Set(
+                    [getComplementaryColor(hue: baseHSB.hue)]
+                    + getTriadicColors(hue: baseHSB.hue)
+                    + getSplitComplementaryColors(hue: baseHSB.hue)
+                    + getAnalogousColors(hue: baseHSB.hue)
+                    + getTetradicColors(hue: baseHSB.hue)
+                )
+
+                if harmonyHues.contains(where: { isColorCompatible(hue1: hsb.hue, hue2: $0) }) {
+                    harmonyColors.append(color)
+                }
+            }
+        }
+
+        // Tentukan kategori dominan
+        let dominantCategory = [neutralColors, monochromeColors, harmonyColors]
+            .max(by: { $0.count < $1.count }) ?? []
+
+        guard !dominantCategory.isEmpty else { return nil }
+
+        // Pilih warna terdekat ke base hue atau complementary, tergantung kategorinya
+        let targetHue: CGFloat = {
+            if dominantCategory == neutralColors {
+                return baseHSB.hue // warna netral tidak terlalu bergantung pada hue, jadi base hue cukup
+            } else if dominantCategory == monochromeColors {
+                return baseHSB.hue
+            } else {
+                return getComplementaryColor(hue: baseHSB.hue)
+            }
+        }()
+
+        return dominantCategory.min { color1, color2 in
             guard let hsb1 = UIColor(color1).toHSB(),
                   let hsb2 = UIColor(color2).toHSB() else { return false }
-            
-            let diff1 = min(abs(hsb1.hue - complementaryHue), 360 - abs(hsb1.hue - complementaryHue))
-            let diff2 = min(abs(hsb2.hue - complementaryHue), 360 - abs(hsb2.hue - complementaryHue))
-            
+
+            let diff1 = min(abs(hsb1.hue - targetHue), 360 - abs(hsb1.hue - targetHue))
+            let diff2 = min(abs(hsb2.hue - targetHue), 360 - abs(hsb2.hue - targetHue))
+
             return diff1 < diff2
         }
     }
 
 
+
     
 }
-
-
-

@@ -273,7 +273,11 @@ struct ColorClosetSegmentedView: View {
                                     if case let .solidTop(color) = sel { return color } else { return nil }
                                 },
                                 onSelect: { color in
-                                    selectedItem = .solidTop(color)
+                                    if case let .solidTop(selectedColor) = selectedItem, selectedColor == color {
+                                        selectedItem = nil
+                                    } else {
+                                        selectedItem = .solidTop(color)
+                                    }
                                 },
                                 onAddColor: {
                                     showSolidColorPicker = true
@@ -288,7 +292,11 @@ struct ColorClosetSegmentedView: View {
                                     if case let .solidBottom(color) = sel { return color } else { return nil }
                                 },
                                 onSelect: { color in
-                                    selectedItem = .solidBottom(color)
+                                    if case let .solidBottom(selectedColor) = selectedItem, selectedColor == color {
+                                        selectedItem = nil
+                                    } else {
+                                        selectedItem = .solidBottom(color)
+                                    }
                                 },
                                 onAddColor: {
                                     showSolidColorPicker = true
@@ -334,7 +342,11 @@ struct ColorClosetSegmentedView: View {
                                     if case let .multiTop(idx) = sel { return idx } else { return nil }
                                 },
                                 onSelect: { idx in
-                                    selectedItem = .multiTop(idx)
+                                    if case let .multiTop(selectedIdx) = selectedItem, selectedIdx == idx {
+                                        selectedItem = nil
+                                    } else {
+                                        selectedItem = .multiTop(idx)
+                                    }
                                 },
                                 onAddColor: {
                                     showMultiColorPicker = true
@@ -348,7 +360,11 @@ struct ColorClosetSegmentedView: View {
                                     if case let .multiBottom(idx) = sel { return idx } else { return nil }
                                 },
                                 onSelect: { idx in
-                                    selectedItem = .multiBottom(idx)
+                                    if case let .multiBottom(selectedIdx) = selectedItem, selectedIdx == idx {
+                                        selectedItem = nil
+                                    } else {
+                                        selectedItem = .multiBottom(idx)
+                                    }
                                 },
                                 onAddColor: {
                                     showMultiColorPicker = true
@@ -368,10 +384,11 @@ struct ColorClosetSegmentedView: View {
                             .foregroundColor(.white)
                             .frame(maxWidth: .infinity)
                             .padding()
-                            .background(Color.black)
+                            .background(selectedItem == nil ? Color.gray : Color.black)
                             .cornerRadius(14)
                     }
                     .disabled(selectedItem == nil)
+                    .opacity(selectedItem == nil ? 0.6 : 1.0)
                     .padding(.horizontal)
                     .padding(.bottom, 20)
                     
@@ -488,7 +505,11 @@ struct ColorBlockGridSingleSelect: View {
                     }
                 }
                 .onTapGesture {
-                    onSelect(color)
+                    if selectedColor == color {
+                        onSelect(color) // This will trigger unselect since the color is already selected
+                    } else {
+                        onSelect(color)
+                    }
                 }
             }
             
@@ -539,7 +560,11 @@ struct MultiColorBlockGridSingleSelect: View {
                     }
                 }
                 .onTapGesture {
-                    onSelect(index)
+                    if selectedIndex == index {
+                        onSelect(index) // This will trigger unselect since the index is already selected
+                    } else {
+                        onSelect(index)
+                    }
                 }
             }
             

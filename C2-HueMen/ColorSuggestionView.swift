@@ -53,6 +53,38 @@ struct RecommendationView: View {
         showAddToWardrobeAlert = true
     }
     
+    struct StripedShirtView: View {
+        let color1: Color
+        let color2: Color
+        
+        var body: some View {
+            Image(systemName: "tshirt.fill")
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .frame(width: 125, height: 120)
+                .overlay(
+                    GeometryReader { geometry in
+                        Path { path in
+                            let stripeWidth = geometry.size.width / 10 // Adjust for stripe density
+                            for i in 0...Int(geometry.size.width / stripeWidth) {
+                                let x = CGFloat(i) * stripeWidth
+                                path.move(to: CGPoint(x: x, y: 0))
+                                path.addLine(to: CGPoint(x: x, y: geometry.size.height))
+                            }
+                        }
+                        .stroke(color2, lineWidth: geometry.size.width / 20)
+                    }
+                        .mask(
+                            Image(systemName: "tshirt.fill")
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
+                        )
+                    .allowsHitTesting(false)
+                )
+                .foregroundColor(color1)
+        }
+    }
+    
     var body: some View {
         NavigationStack {
             ZStack {
@@ -97,12 +129,30 @@ struct RecommendationView: View {
                             .shadow(radius: 2)
                             .frame(height: 300)
                         VStack(spacing: 0) {
-                            Image(systemName: "tshirt.fill")
-                                .resizable()
-                                .aspectRatio(contentMode: .fit)
-                                .frame(width: 125, height: 120)
-                                .foregroundColor(uploadType == .top ? selectedColor : (selectedCompatibleColor?.color ?? selectedColor))
-                                .padding(.bottom, 0)
+                            if uploadType == .top {
+                                // For top selection
+                                if let multiColors = getMultiColorPair(for: selectedColor) {
+                                    StripedShirtView(color1: multiColors.0, color2: multiColors.1)
+                                } else {
+                                    Image(systemName: "tshirt.fill")
+                                        .resizable()
+                                        .aspectRatio(contentMode: .fit)
+                                        .frame(width: 125, height: 120)
+                                        .foregroundColor(selectedColor)
+                                }
+                            } else {
+                                // For bottom selection
+                                if let compatibleMultiColors = getMultiColorPair(for: selectedCompatibleColor?.color ?? selectedColor) {
+                                    StripedShirtView(color1: compatibleMultiColors.0, color2: compatibleMultiColors.1)
+                                } else {
+                                    Image(systemName: "tshirt.fill")
+                                        .resizable()
+                                        .aspectRatio(contentMode: .fit)
+                                        .frame(width: 125, height: 120)
+                                        .foregroundColor(selectedCompatibleColor?.color ?? selectedColor)
+                                }
+                            }
+                            
                             PantsShape(leftWidthRatio: leftWidthRatio, rightWidthRatio: rightWidthRatio)
                                 .fill(uploadType == .top ? (selectedCompatibleColor?.color ?? selectedColor) : selectedColor)
                                 .frame(width: 70, height: 145)
@@ -203,6 +253,16 @@ struct RecommendationView: View {
         print("Wardrobe colors: \(wardrobe)")
         print("Compatible colors: \(compatibleColors)")
         print("Most compatible: \(String(describing: mostCompatibleColor))")
+    }
+    
+    private func getMultiColorPair(for color: Color) -> (Color, Color)? {
+        let multiColors = uploadType == .top ? colorManager.multiTopColors : colorManager.multiBottomColors
+        return multiColors.first { pair in
+            let components1 = UIColor(pair.0).cgColor.components ?? []
+            let components2 = UIColor(color).cgColor.components ?? []
+            return components1.count == components2.count &&
+                   zip(components1, components2).allSatisfy { abs($0 - $1) < 0.01 }
+        }
     }
     
     struct ColorBlocks: View {

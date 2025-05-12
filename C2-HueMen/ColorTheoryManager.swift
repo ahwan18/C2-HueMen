@@ -174,9 +174,8 @@ class ColorTheoryManager {
             return dist1 < dist2
         }
     }
-<<<<<<< HEAD
 
 }
-=======
-} 
->>>>>>> main
+
+
+

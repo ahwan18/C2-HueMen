@@ -306,36 +306,27 @@ struct ColorClosetSegmentedView: View {
                             .padding(.bottom, 30)
                         }
 
-                        HStack {
-                            Text("Multi Color")
-                                .font(.headline)
-                            Spacer()
-                            // Show delete button only if a multi color is selected
-                            if let selectedItem = selectedItem, case .multiTop(_) = selectedItem, selectedSection == .top {
-                                Button(action: {
-                                    if case let .multiTop(index) = selectedItem {
-                                        colorManager.removeMultiTopColor(at: index)
-                                        self.selectedItem = nil
+                        // Only show multi-color section for top section
+                        if selectedSection == .top {
+                            HStack {
+                                Text("Multi Color")
+                                    .font(.headline)
+                                Spacer()
+                                // Show delete button only if a multi color is selected
+                                if let selectedItem = selectedItem, case .multiTop(_) = selectedItem {
+                                    Button(action: {
+                                        if case let .multiTop(index) = selectedItem {
+                                            colorManager.removeMultiTopColor(at: index)
+                                            self.selectedItem = nil
+                                        }
+                                    }) {
+                                        Image(systemName: "trash")
+                                            .foregroundColor(.red)
                                     }
-                                }) {
-                                    Image(systemName: "trash")
-                                        .foregroundColor(.red)
-                                }
-                            } else if let selectedItem = selectedItem, case .multiBottom(_) = selectedItem, selectedSection == .bottom {
-                                Button(action: {
-                                    if case let .multiBottom(index) = selectedItem {
-                                        colorManager.removeMultiBottomColor(at: index)
-                                        self.selectedItem = nil
-                                    }
-                                }) {
-                                    Image(systemName: "trash")
-                                        .foregroundColor(.red)
                                 }
                             }
-                        }
-                        .padding(.horizontal)
+                            .padding(.horizontal)
 
-                        if selectedSection == .top {
                             MultiColorBlockGridSingleSelect(
                                 colors: colorManager.multiTopColors,
                                 selectedIndex: selectedItem.flatMap { sel in
@@ -346,24 +337,6 @@ struct ColorClosetSegmentedView: View {
                                         selectedItem = nil
                                     } else {
                                         selectedItem = .multiTop(idx)
-                                    }
-                                },
-                                onAddColor: {
-                                    showMultiColorPicker = true
-                                },
-                                onDelete: { _ in }
-                            )
-                        } else {
-                            MultiColorBlockGridSingleSelect(
-                                colors: colorManager.multiBottomColors,
-                                selectedIndex: selectedItem.flatMap { sel in
-                                    if case let .multiBottom(idx) = sel { return idx } else { return nil }
-                                },
-                                onSelect: { idx in
-                                    if case let .multiBottom(selectedIdx) = selectedItem, selectedIdx == idx {
-                                        selectedItem = nil
-                                    } else {
-                                        selectedItem = .multiBottom(idx)
                                     }
                                 },
                                 onAddColor: {

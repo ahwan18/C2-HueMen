@@ -66,14 +66,20 @@ struct RecommendationView: View {
                 .overlay(
                     GeometryReader { geometry in
                         Path { path in
-                            let stripeWidth = geometry.size.width / 10 // Adjust for stripe density
-                            for i in 0...Int(geometry.size.width / stripeWidth) {
-                                let x = CGFloat(i) * stripeWidth
-                                path.move(to: CGPoint(x: x, y: 0))
-                                path.addLine(to: CGPoint(x: x, y: geometry.size.height))
+                            // MARK: - Mengatur jumlah garis
+                            // Ubah angka 10 untuk mengatur jumlah garis
+                            // Semakin kecil angka, semakin banyak garis
+                            let stripeHeight = geometry.size.height / 10
+                            for i in 0...Int(geometry.size.height / stripeHeight) {
+                                let y = CGFloat(i) * stripeHeight
+                                path.move(to: CGPoint(x: 0, y: y))
+                                path.addLine(to: CGPoint(x: geometry.size.width, y: y))
                             }
                         }
-                        .stroke(color2, lineWidth: geometry.size.width / 20)
+                        // MARK: - Mengatur ketebalan garis
+                        // Ubah angka 20 untuk mengatur ketebalan garis
+                        // Semakin kecil angka, semakin tebal garis
+                        .stroke(color2, lineWidth: geometry.size.height / 16)
                     }
                         .mask(
                             Image(systemName: "tshirt.fill")

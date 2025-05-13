@@ -19,6 +19,7 @@ struct RecommendationView: View {
     
     let selectedColor: Color
     let uploadType: UploadType
+    let colorType: ColorType
     
     @StateObject private var colorManager = ColorClosetManager.shared
     @State private var compatibleColors: [ColorItem] = []
@@ -131,7 +132,8 @@ struct RecommendationView: View {
                         VStack(spacing: 0) {
                             if uploadType == .top {
                                 // For top selection
-                                if let multiColors = getMultiColorPair(for: selectedColor) {
+                                if colorType == .multi,
+                                    let multiColors = getMultiColorPair(for: selectedColor) {
                                     StripedShirtView(color1: multiColors.0, color2: multiColors.1)
                                 } else {
                                     Image(systemName: "tshirt.fill")
@@ -253,6 +255,7 @@ struct RecommendationView: View {
         print("Wardrobe colors: \(wardrobe)")
         print("Compatible colors: \(compatibleColors)")
         print("Most compatible: \(String(describing: mostCompatibleColor))")
+        print("Color Type: ", colorType)
     }
     
     private func getMultiColorPair(for color: Color) -> (Color, Color)? {
@@ -325,5 +328,5 @@ struct RecommendationView: View {
 }
 
 #Preview {
-    RecommendationView(selectedColor: .brown, uploadType: .top)
+    RecommendationView(selectedColor: .brown, uploadType: .top, colorType: .solid)
 }

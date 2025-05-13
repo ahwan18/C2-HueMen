@@ -1,5 +1,10 @@
 import SwiftUI
 
+enum ColorType {
+    case solid
+    case multi
+}
+
 class ColorClosetManager: ObservableObject {
     @Published var solidTopColors: [Color] = []
     @Published var multiTopColors: [(Color, Color)] = []
@@ -267,11 +272,13 @@ struct ColorClosetSegmentedView: View {
                         .padding(.horizontal)
 
                         if selectedSection == .top {
+                            let selectedTopColor = selectedItem.flatMap { sel in
+                                if case let .solidTop(color) = sel { return color } else { return nil }
+                            }
+                            
                             ColorBlockGridSingleSelect(
                                 colors: colorManager.solidTopColors,
-                                selectedColor: selectedItem.flatMap { sel in
-                                    if case let .solidTop(color) = sel { return color } else { return nil }
-                                },
+                                selectedColor: selectedTopColor,
                                 onSelect: { color in
                                     if case let .solidTop(selectedColor) = selectedItem, selectedColor == color {
                                         selectedItem = nil
@@ -286,11 +293,13 @@ struct ColorClosetSegmentedView: View {
                             )
                             .padding(.bottom, 30)
                         } else {
+                            let selectedBottomColor = selectedItem.flatMap { sel in
+                                if case let .solidBottom(color) = sel { return color } else { return nil }
+                            }
+                            
                             ColorBlockGridSingleSelect(
                                 colors: colorManager.solidBottomColors,
-                                selectedColor: selectedItem.flatMap { sel in
-                                    if case let .solidBottom(color) = sel { return color } else { return nil }
-                                },
+                                selectedColor: selectedBottomColor,
                                 onSelect: { color in
                                     if case let .solidBottom(selectedColor) = selectedItem, selectedColor == color {
                                         selectedItem = nil
@@ -365,10 +374,28 @@ struct ColorClosetSegmentedView: View {
                     .padding(.horizontal)
                     .padding(.bottom, 20)
                     
+                    //                    if let params = getRecommendationParams() {
+                    //                        NavigationLink(
+                    //                            destination: RecommendationView(
+                    //                                selectedColor: params.color,
+                    //                                uploadType: params.uploadType
+                    //                            )
+                    //                                .navigationBarBackButtonHidden(true),
+                    //                            isActive: $showRecommendation
+                    //                        ) {
+                    //                            EmptyView()
+                    //                        }
+                    //                    }
+                    
                     if let params = getRecommendationParams() {
+                        let destination = RecommendationView(
+                            selectedColor: params.color,
+                            uploadType: params.uploadType,
+                            colorType: params.colorType
+                        ).navigationBarBackButtonHidden(true)
+
                         NavigationLink(
-                            destination: RecommendationView(selectedColor: params.color, uploadType: params.uploadType)
-                                .navigationBarBackButtonHidden(true),
+                            destination: destination,
                             isActive: $showRecommendation
                         ) {
                             EmptyView()
@@ -423,20 +450,20 @@ struct ColorClosetSegmentedView: View {
         }
     }
     
-    private func getRecommendationParams() -> (color: Color, uploadType: UploadType)? {
+    private func getRecommendationParams() -> (color: Color, uploadType: UploadType, colorType: ColorType)? {
         guard let selected = selectedItem else { return nil }
         
         switch selected {
         case .solidTop(let color):
-            return (color, .top)
+            return (color, .top, .solid)
         case .multiTop(let index):
             guard index < colorManager.multiTopColors.count else { return nil }
-            return (colorManager.multiTopColors[index].0, .top)
+            return (colorManager.multiTopColors[index].0, .top, .multi)
         case .solidBottom(let color):
-            return (color, .bottom)
+            return (color, .bottom, .solid)
         case .multiBottom(let index):
             guard index < colorManager.multiBottomColors.count else { return nil }
-            return (colorManager.multiBottomColors[index].0, .bottom)
+            return (colorManager.multiBottomColors[index].0, .bottom, .multi)
         }
     }
 }

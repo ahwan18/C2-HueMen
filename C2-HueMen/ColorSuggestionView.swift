@@ -39,7 +39,7 @@ struct RecommendationView: View {
             let components1 = UIColor(existingColor).cgColor.components ?? []
             let components2 = UIColor(color).cgColor.components ?? []
             return components1.count == components2.count &&
-                   zip(components1, components2).allSatisfy { abs($0 - $1) < 0.01 }
+            zip(components1, components2).allSatisfy { abs($0 - $1) < 0.01 }
         }
     }
     
@@ -79,7 +79,7 @@ struct RecommendationView: View {
                                 .resizable()
                                 .aspectRatio(contentMode: .fit)
                         )
-                    .allowsHitTesting(false)
+                        .allowsHitTesting(false)
                 )
                 .foregroundColor(color1)
         }
@@ -104,14 +104,14 @@ struct RecommendationView: View {
                                 .frame(maxWidth: .infinity, alignment: .leading)
                         }
                         
-                        if !isColorInWardrobe(selectedColor) {
+                        if !isColorInWardrobe(selectedColor) && getMultiColorPair(for: selectedColor) == nil {
                             Button(action: {
                                 alertMessage = "Do you want to add this new \(uploadType == .top ? "top" : "bottom") color to your wardrobe?"
                                 showAddToWardrobeAlert = true
                             }) {
                                 Text("Add Color")
                                 Image(systemName: "plus")
-                                    
+                                
                             }
                             .foregroundStyle(.white)
                             .padding(.vertical, 7)
@@ -261,7 +261,7 @@ struct RecommendationView: View {
             let components1 = UIColor(pair.0).cgColor.components ?? []
             let components2 = UIColor(color).cgColor.components ?? []
             return components1.count == components2.count &&
-                   zip(components1, components2).allSatisfy { abs($0 - $1) < 0.01 }
+            zip(components1, components2).allSatisfy { abs($0 - $1) < 0.01 }
         }
     }
     

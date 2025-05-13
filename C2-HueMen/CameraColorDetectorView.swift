@@ -126,7 +126,7 @@ struct CameraColorDetectorView: View {
         }
         .fullScreenCover(isPresented: $showColorSuggestion) {
             if let color = capturedColor {
-                RecommendationView(selectedColor: color, uploadType: uploadType)
+                RecommendationView(selectedColor: color, uploadType: uploadType, colorType: .solid)
             }
         }
     }

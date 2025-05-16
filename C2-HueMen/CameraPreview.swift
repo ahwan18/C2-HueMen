@@ -12,8 +12,4 @@ struct CameraPreview: UIViewRepresentable {
         view.layer.addSublayer(previewLayer)
         return view
     }
-
-    func updateUIView(_ uiView: UIView, context: Context) {
-        // No-op
-    }
 }

@@ -34,6 +34,9 @@ struct RecommendationView: View {
     @State private var showAddToWardrobeAlert = false
     @State private var alertMessage = ""
     
+    @State private var isColorAdded = false
+    @State private var showAddedFeedback = false
+    
     private func isColorInWardrobe(_ color: Color) -> Bool {
         let wardrobe = uploadType == .top ? colorManager.solidTopColors : colorManager.solidBottomColors
         return wardrobe.contains { existingColor in
@@ -50,8 +53,22 @@ struct RecommendationView: View {
         } else {
             colorManager.addSolidBottomColor(color)
         }
-        alertMessage = "Color has been added to your wardrobe"
-        showAddToWardrobeAlert = true
+        
+        // Update state untuk feedback
+        withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
+            isColorAdded = true
+        }
+        
+        // Opsi 2: Tampilkan toast message
+        showAddedFeedback = true
+        
+        // Opsi 3: Haptic feedback
+        let generator = UINotificationFeedbackGenerator()
+        generator.notificationOccurred(.success)
+        
+//        alertMessage = "Color has been added to your wardrobe"
+//        
+//        showAddToWardrobeAlert = true
     }
     
     struct StripedShirtView: View {
@@ -111,20 +128,34 @@ struct RecommendationView: View {
                                 .frame(maxWidth: .infinity, alignment: .leading)
                         }
                         
-                        if !isColorInWardrobe(selectedColor) && getMultiColorPair(for: selectedColor) == nil {
+                        if !isColorInWardrobe(selectedColor) && getMultiColorPair(for: selectedColor) == nil && !isColorAdded {
                             Button(action: {
                                 alertMessage = "Do you want to add this new \(uploadType == .top ? "top" : "bottom") color to your wardrobe?"
                                 showAddToWardrobeAlert = true
                             }) {
-                                Text("Add Color")
-                                Image(systemName: "plus")
-                                
+                                HStack {
+                                    Text("Add Color")
+                                    Image(systemName: "plus")
+                                }
+                                .foregroundStyle(.white)
+                                .padding(.vertical, 7)
+                                .padding(.horizontal, 15)
+                                .background(.black)
+                                .cornerRadius(20)
                             }
-                            .foregroundStyle(.white)
-                            .padding(.vertical, 7)
-                            .padding(.horizontal, 15)
-                            .background(.black)
-                            .cornerRadius(20)
+                        } else if isColorAdded {
+                            Button(action: {}) {
+                                HStack {
+                                    Text("Added")
+                                    Image(systemName: "checkmark")
+                                }
+                                .foregroundStyle(.white)
+                                .padding(.vertical, 7)
+                                .padding(.horizontal, 15)
+                                .background(Color.blue)
+                                .cornerRadius(20)
+                            }
+                            .transition(.scale.combined(with: .opacity))
                         }
                     }
                     .padding(.horizontal)
@@ -170,32 +201,48 @@ struct RecommendationView: View {
                     
                     // Compatibility Palette
                     VStack(alignment: .leading, spacing: 12) {
-                        Text("Most compatible:")
-                            .fontWeight(.semibold)
-                            .foregroundStyle(.black)
-                        HStack(alignment: .center, spacing: 16) {
-                            if let mostCompatible = mostCompatibleColor {
-                                ColorBlocks(color: mostCompatible.color, isSelected: selectedCompatibleColor?.id == mostCompatible.id)
-                                    .onTapGesture {
-                                        selectedCompatibleColor = mostCompatible
-                                    }
+                        if compatibleColors.isEmpty && mostCompatibleColor == nil {
+                            VStack(spacing: 20) {
+                                Text("Oops!")
+                                    .font(.system(size: 50, weight: .semibold))
+                                    .foregroundStyle(.black)
+                                Text("Looks like there's no match for this color from your wardrobe.")
+                                    .font(.title3)
+                                    .multilineTextAlignment(.center)
+                                    .foregroundStyle(.black)
+                                    .padding(.horizontal, 20)
+                                    .fixedSize(horizontal: false, vertical: true)
                             }
-                            Spacer()
-                        }
-                        
-                        if !compatibleColors.isEmpty {
-                            Text("Other compatible colors:")
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 180) // Tetapkan tinggi minimum
+                        } else {
+                            Text("Most compatible \(uploadType == .top ? "bottom" : "top") color:")
+                                .fontWeight(.semibold)
                                 .foregroundStyle(.black)
                             HStack(alignment: .center, spacing: 16) {
-                                ForEach(compatibleColors) { colorItem in
-                                    if colorItem.id != mostCompatibleColor?.id {
-                                        ColorBlocks(color: colorItem.color, isSelected: selectedCompatibleColor?.id == colorItem.id)
-                                            .onTapGesture {
-                                                selectedCompatibleColor = colorItem
-                                            }
-                                    }
+                                if let mostCompatible = mostCompatibleColor {
+                                    ColorBlocks(color: mostCompatible.color, isSelected: selectedCompatibleColor?.id == mostCompatible.id)
+                                        .onTapGesture {
+                                            selectedCompatibleColor = mostCompatible
+                                        }
                                 }
                                 Spacer()
+                            }
+                            
+                            if !compatibleColors.isEmpty {
+                                Text("Other compatible \(uploadType == .top ? "bottom" : "top") colors:")
+                                    .foregroundStyle(.black)
+                                HStack(alignment: .center, spacing: 16) {
+                                    ForEach(compatibleColors) { colorItem in
+                                        if colorItem.id != mostCompatibleColor?.id {
+                                            ColorBlocks(color: colorItem.color, isSelected: selectedCompatibleColor?.id == colorItem.id)
+                                                .onTapGesture {
+                                                    selectedCompatibleColor = colorItem
+                                                }
+                                        }
+                                    }
+                                    Spacer()
+                                }
                             }
                         }
                     }
@@ -206,16 +253,24 @@ struct RecommendationView: View {
                     .shadow(radius: 2)
                     .padding(.horizontal)
                     
-                    // Done button
-                    Button("Done") {
-                        isDoneActive = true
+                    if (!compatibleColors.isEmpty && mostCompatibleColor != nil) {
+                        Spacer()
+                            .frame(height: 0)
+                    } else {
+                        Spacer()
                     }
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color.black)
-                    .cornerRadius(10)
-                    .padding(.horizontal)
+                    
+                    Button(action: {
+                        isDoneActive = true
+                    }) {
+                        Text(compatibleColors.isEmpty && mostCompatibleColor == nil ? "Pick Again" : "Done")
+                        .foregroundStyle(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(Color.black)
+                        .cornerRadius(10)
+                        .padding(.horizontal)
+                    }
                     
                     NavigationLink(destination: HomeScreen(), isActive: $isDoneActive) {
                         EmptyView()
@@ -226,6 +281,35 @@ struct RecommendationView: View {
                 .onAppear {
                     updateCompatibleColors()
                 }
+                
+                // Tambahkan overlay untuk toast message (Opsi 2)
+//                .overlay(
+//                    Group {
+//                        if showAddedFeedback {
+//                            VStack {
+//                                Spacer()
+//                                Text("Color added to wardrobe!")
+//                                    .foregroundColor(.white)
+//                                    .padding()
+//                                    .background(Color.black.opacity(0.8))
+//                                    .cornerRadius(10)
+//                                    .padding(.bottom, 20)
+//                                    .transition(.move(edge: .bottom).combined(with: .opacity))
+//                            }
+//                        }
+//                    }
+//                    .animation(.spring(response: 0.3, dampingFraction: 0.6), value: showAddedFeedback)
+//                )
+//                .onChange(of: showAddedFeedback) { newValue in
+//                    if newValue {
+//                        // Hilangkan toast setelah 2 detik
+//                        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+//                            withAnimation {
+//                                showAddedFeedback = false
+//                            }
+//                        }
+//                    }
+//                }
             }
         }
         .alert("Add Color to Wardrobe", isPresented: $showAddToWardrobeAlert) {
@@ -334,5 +418,5 @@ struct RecommendationView: View {
 }
 
 #Preview {
-    RecommendationView(selectedColor: .brown, uploadType: .top, colorType: .solid)
+    RecommendationView(selectedColor: .pickFromWardrobeButton, uploadType: .top, colorType: .solid)
 }
